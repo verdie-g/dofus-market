@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DofusMarket", "DofusMarket\DofusMarket.csproj", "{A94A2065-BC2E-4B13-847B-EDF96EDD5877}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dofus", "Dofus\Dofus.csproj", "{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A94A2065-BC2E-4B13-847B-EDF96EDD5877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A94A2065-BC2E-4B13-847B-EDF96EDD5877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A94A2065-BC2E-4B13-847B-EDF96EDD5877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A94A2065-BC2E-4B13-847B-EDF96EDD5877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
