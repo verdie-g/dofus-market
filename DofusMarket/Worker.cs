@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,7 +11,10 @@ using Dofus.Messages;
 using Dofus.Serialization;
 using Dofus.Types;
 using DofusMarket.Frames;
+using DofusMarket.Models;
 using DofusMarket.Services;
+using InfluxDB.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -23,26 +25,37 @@ namespace DofusMarket
         private static readonly IPEndPoint DofusConnectionEndpoint = new(IPAddress.Parse("34.252.21.81"), 5555); // connection.host/port in config.xml
 
         private readonly CryptoService _cryptoService;
-        private readonly DofusMetrics _dofusMetrics;
+        private readonly InfluxDBClient _influxDb;
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
 
-        public Worker(CryptoService cryptoService, DofusMetrics dofusMetrics, IHostApplicationLifetime appLifetime,
-            ILoggerFactory loggerFactory)
+        public Worker(CryptoService cryptoService, InfluxDBClient influxDb, IHostApplicationLifetime appLifetime,
+            ILoggerFactory loggerFactory, IConfiguration configuration)
         {
             _cryptoService = cryptoService;
-            _dofusMetrics = dofusMetrics;
+            _influxDb = influxDb;
             _appLifetime = appLifetime;
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger(typeof(DofusClient));
+            _configuration = configuration;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             try
             {
-                await InnerExecuteAsync(cancellationToken);
+                AccountConfiguration[] accountConfigurations = _configuration
+                    .GetSection("DofusMarket:Accounts")
+                    .Get<AccountConfiguration[]>();
+                foreach (var account in accountConfigurations)
+                {
+                    foreach (var character in account.Characters)
+                    {
+                        await ExecuteOnServer(account, character, cancellationToken);
+                    }
+                }
             }
             catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -55,9 +68,11 @@ namespace DofusMarket
             }
         }
 
-        private async Task InnerExecuteAsync(CancellationToken cancellationToken)
+        private async Task ExecuteOnServer(AccountConfiguration accountConfiguration,
+            CharacterConfiguration characterConfiguration, CancellationToken cancellationToken)
         {
-            var authenticationResult = await AuthenticateAsync(DofusConnectionEndpoint, cancellationToken);
+            var authenticationResult = await AuthenticateAsync(DofusConnectionEndpoint, accountConfiguration,
+                characterConfiguration.ServerId, cancellationToken);
             if (authenticationResult == null)
             {
                 return;
@@ -66,8 +81,11 @@ namespace DofusMarket
             using DofusClient client = new(authenticationResult.ServerEndPoint, _loggerFactory.CreateLogger(typeof(DofusClient)));
             FrameManager frameManager = new(client, _loggerFactory);
 
-            var gameServerApproachFrame = frameManager.Register(new GameServerApproachFrame(authenticationResult.Ticket));
+            var gameServerApproachFrame = frameManager.Register(
+                new GameServerApproachFrame(authenticationResult.Ticket, characterConfiguration.CharacterId));
             await gameServerApproachFrame.ProcessTask;
+
+            DofusMetrics dofusMetrics = new(_influxDb, characterConfiguration.ServerId);
 
             // Try to imitate what the official client sends after connecting.
             frameManager.Register(new SocialFrame());
@@ -76,15 +94,16 @@ namespace DofusMarket
             frameManager.Register(new AllianceFrame());
             frameManager.Register(new WorldFrame());
             frameManager.Register(new SynchronizationFrame());
-            frameManager.Register(new ItemPricesCollectorFrame(_dofusMetrics));
+            var itemPricesCollectorFrame = frameManager.Register(new ItemPricesCollectorFrame(dofusMetrics));
             // Send again a hardcoded flash key.
             await client.SendMessageAsync(new ClientKeyMessage { Key = "R7JdEA438imJUeyTlF#01" });
             await client.SendMessageAsync(new GameContextCreateRequestMessage());
 
-            await Task.Delay(Timeout.Infinite, cancellationToken);
+            await itemPricesCollectorFrame.ProcessTask;
         }
 
-        private async Task<AuthenticationResult?> AuthenticateAsync(EndPoint connectionEndpoint, CancellationToken cancellationToken)
+        private async Task<AuthenticationResult?> AuthenticateAsync(EndPoint connectionEndpoint,
+            AccountConfiguration accountConfiguration, int serverId, CancellationToken cancellationToken)
         {
             using DofusClient client = new(connectionEndpoint, _loggerFactory.CreateLogger(typeof(DofusClient)));
 
@@ -97,7 +116,7 @@ namespace DofusMarket
                 {
                     case HelloConnectMessage helloConnect:
                         _logger.LogInformation("Identifying");
-                        await IdentifyAsync(helloConnect, aes, client);
+                        await IdentifyAsync(helloConnect, accountConfiguration, aes, client);
                         break;
 
                     case LoginQueueStatusMessage queueStatus:
@@ -116,9 +135,8 @@ namespace DofusMarket
                         _logger.LogInformation("Identification succeed");
                         break;
 
-                    case ServerListMessage serverList:
-                        GameServerInformations server = serverList.Servers.First(s => s.CharactersCount != 0);
-                        await client.SendMessageAsync(new ServerSelectionMessage { ServerId = server.Id });
+                    case ServerListMessage:
+                        await client.SendMessageAsync(new ServerSelectionMessage { ServerId = (short)serverId });
                         break;
 
                     case SelectedServerRefusedMessage selectedServerRefused:
@@ -138,7 +156,8 @@ namespace DofusMarket
             return null;
         }
 
-        private async Task IdentifyAsync(HelloConnectMessage helloConnect, Aes aes, DofusClient client)
+        private async Task IdentifyAsync(HelloConnectMessage helloConnect, AccountConfiguration accountConfiguration,
+            Aes aes, DofusClient client)
         {
             // Taken from the official Dofus client in com.ankamagames.dofus.logic.connection.managers.AuthentificationManager__verifyKey
             const string verifyKeyPem = @"-----BEGIN PUBLIC KEY-----
@@ -150,10 +169,6 @@ ad1aUp81Ox77l5e8KBJXHzYhdeXaM91wnHTZNhuWmFS3snUHRCBpjDBCkZZ+CxPnKMtm2qJIi57R
 slALQVTykEZoAETKWpLBlSm92X/eXY2DdGf+a7vju9EigYbX0aXxQy2Ln2ZBWmUJyZE8B58CAwEA
 AQ==
 -----END PUBLIC KEY-----";
-            const string accountName = "tresgrossepoubelle";
-            const string password = "huif6PPiVmkvLku";
-            const uint certificateId = 118484446;
-            const string certificateHash = "e1e9f893a82bdca6a50f85cb7d430607f955c7aa7b965add839c50fd9e6e05fa";
 
             Debug.Assert(helloConnect.Salt.Length == 32);
             byte[] key = _cryptoService.RsaDecrypt(helloConnect.Key, verifyKeyPem);
@@ -164,16 +179,12 @@ AQ==
             using (DofusBinaryWriter credentialsWriter = new(credentialsStream, leaveOpen: true))
             {
                 credentialsWriter.Write(Encoding.ASCII.GetBytes(helloConnect.Salt));
-                if (certificateHash != null)
-                {
-                    credentialsWriter.Write(aes.Key);
-                    credentialsWriter.Write(certificateId);
-                }
-
-                credentialsWriter.Write(Encoding.ASCII.GetBytes(certificateHash));
-                credentialsWriter.Write((byte)accountName.Length);
-                credentialsWriter.Write(Encoding.ASCII.GetBytes(accountName));
-                credentialsWriter.Write(Encoding.ASCII.GetBytes(password));
+                credentialsWriter.Write(aes.Key);
+                credentialsWriter.Write(accountConfiguration.CertificateId);
+                credentialsWriter.Write(Encoding.ASCII.GetBytes(accountConfiguration.CertificateHash));
+                credentialsWriter.Write((byte)accountConfiguration.AccountName.Length);
+                credentialsWriter.Write(Encoding.ASCII.GetBytes(accountConfiguration.AccountName));
+                credentialsWriter.Write(Encoding.ASCII.GetBytes(accountConfiguration.Password));
             }
 
             byte[] credentials = credentialsStream.ToArray();
@@ -182,7 +193,7 @@ AQ==
             await client.SendMessageAsync(new IdentificationMessage
             {
                 AutoConnect = false,
-                UseCertificate = certificateHash != null,
+                UseCertificate = true,
                 UseLoginToken = false,
                 Version = new DofusVersion { Major = 2, Minor = 60, Code = 1, Build = 6, BuildType = BuildType.Release },
                 Lang = "fr",

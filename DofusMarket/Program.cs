@@ -15,7 +15,7 @@ namespace DofusMarket
                 {
                     services.AddHostedService<Worker>();
                     services.AddSingleton<CryptoService>();
-                    services.AddSingleton(new DofusMetrics(CreateInfluxDbClient(hostContext.Configuration)));
+                    services.AddSingleton(CreateInfluxDbClient(hostContext.Configuration));
                 })
                 .Build().Run();
         }

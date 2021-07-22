@@ -1,6 +1,5 @@
 ﻿using System;
 using InfluxDB.Client;
-using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
 
 namespace DofusMarket.Services
@@ -9,10 +8,12 @@ namespace DofusMarket.Services
     {
         private readonly InfluxDBClient _influxDb;
         private readonly WriteApi _writeApi;
+        private readonly int _serverId;
 
-        public DofusMetrics(InfluxDBClient influxDb)
+        public DofusMetrics(InfluxDBClient influxDb, int serverId)
         {
             _influxDb = influxDb;
+            _serverId = serverId;
             _writeApi = influxDb.GetWriteApi();
         }
 
@@ -20,6 +21,7 @@ namespace DofusMarket.Services
         {
             var point = PointData
                 .Measurement("item_price")
+                .Tag("server_id", _serverId.ToString())
                 .Tag("item_id", itemId.ToString())
                 .Tag("category_id", categoryId.ToString())
                 .Tag("set_size", setSize.ToString())
