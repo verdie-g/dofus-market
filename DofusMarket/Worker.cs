@@ -23,13 +23,16 @@ namespace DofusMarket
         private static readonly IPEndPoint DofusConnectionEndpoint = new(IPAddress.Parse("34.252.21.81"), 5555); // connection.host/port in config.xml
 
         private readonly CryptoService _cryptoService;
+        private readonly DofusMetrics _dofusMetrics;
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
 
-        public Worker(CryptoService cryptoService, IHostApplicationLifetime appLifetime, ILoggerFactory loggerFactory)
+        public Worker(CryptoService cryptoService, DofusMetrics dofusMetrics, IHostApplicationLifetime appLifetime,
+            ILoggerFactory loggerFactory)
         {
             _cryptoService = cryptoService;
+            _dofusMetrics = dofusMetrics;
             _appLifetime = appLifetime;
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger(typeof(DofusClient));
@@ -73,7 +76,7 @@ namespace DofusMarket
             frameManager.Register(new AllianceFrame());
             frameManager.Register(new WorldFrame());
             frameManager.Register(new SynchronizationFrame());
-            frameManager.Register(new ItemPricesCollectorFrame());
+            frameManager.Register(new ItemPricesCollectorFrame(_dofusMetrics));
             // Send again a hardcoded flash key.
             await client.SendMessageAsync(new ClientKeyMessage { Key = "R7JdEA438imJUeyTlF#01" });
             await client.SendMessageAsync(new GameContextCreateRequestMessage());

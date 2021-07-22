@@ -1,16 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dofus;
 using Dofus.Messages;
+using DofusMarket.Services;
 using Microsoft.Extensions.Logging;
 
 namespace DofusMarket.Frames
 {
-    public class ItemPricesCollectorFrame : Frame
+    internal class ItemPricesCollectorFrame : Frame
     {
+        private static readonly int[] SetSizes = { 1, 10, 100 };
+
+        private readonly DofusMetrics _metrics;
+
+        public ItemPricesCollectorFrame(DofusMetrics metrics)
+        {
+            _metrics = metrics;
+        }
+
         public override async Task ProcessAsync(CancellationToken cancellationToken)
         {
             var currentMap = await ReceiveMessageAsync<CurrentMapMessage>();
@@ -32,8 +41,6 @@ namespace DofusMarket.Frames
                     Logger.LogError("Interactive use error");
                     return;
             }
-
-            List<ExchangeTypesItemsExchangerDescriptionForUserMessage> items = new();
 
             var exchange = await ReceiveMessageAsync<ExchangeStartedBidBuyerMessage>();
             await ReceiveMessageAsync<BasicNoOperationMessage>();
@@ -59,7 +66,17 @@ namespace DofusMarket.Frames
                         typeof(BasicNoOperationMessage)))
                     {
                         case ExchangeTypesItemsExchangerDescriptionForUserMessage item:
-                            items.Add(item);
+                            for (int i = 0; i < item.ItemTypeDescriptions[0].Prices.Length; i += 1)
+                            {
+                                int price = (int)item.ItemTypeDescriptions[0].Prices[i];
+                                if (price == 0) // 0 means that the item is not available for this set size.
+                                {
+                                    continue;
+                                }
+
+                                int setSize = SetSizes[i];
+                                _metrics.EmitItemPrice((int)itemId, (int)itemCategoryId, setSize, price);
+                            }
                             await ReceiveMessageAsync<BasicNoOperationMessage>();
                             break;
 
