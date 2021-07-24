@@ -36,7 +36,7 @@ namespace Dofus
         {
             _endPoint = endPoint;
             _logger = logger;
-            _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
             _socketSemaphore = new SemaphoreSlim(1);
             _messagesChannel = Channel.CreateUnbounded<INetworkMessage>(new UnboundedChannelOptions
             {
@@ -123,6 +123,7 @@ namespace Dofus
                     int bytesRead = await _socket.ReceiveAsync(memory, SocketFlags.None, cancellationToken);
                     if (bytesRead == 0)
                     {
+                        _logger.LogInformation("Connection was closed");
                         break;
                     }
 
@@ -141,11 +142,11 @@ namespace Dofus
                 FlushResult result = await pipeWriter.FlushAsync(cancellationToken);
                 if (result.IsCompleted)
                 {
+                    _logger.LogInformation("Message channel was closed");
                     break;
                 }
             }
 
-            _logger.LogInformation("Stop reading messages");
             await pipeWriter.CompleteAsync();
             _messagesChannel.Writer.Complete();
         }

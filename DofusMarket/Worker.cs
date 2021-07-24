@@ -80,6 +80,8 @@ namespace DofusMarket
 
             using DofusClient client = new(authenticationResult.ServerEndPoint, _loggerFactory.CreateLogger(typeof(DofusClient)));
             FrameManager frameManager = new(client, _loggerFactory);
+            frameManager.Register(new SynchronizationFrame());
+            frameManager.Register(new LatencyFrame());
 
             var gameServerApproachFrame = frameManager.Register(
                 new GameServerApproachFrame(authenticationResult.Ticket, characterConfiguration.CharacterId));
@@ -88,8 +90,6 @@ namespace DofusMarket
             DofusMetrics dofusMetrics = new(_influxDb, characterConfiguration.ServerId);
 
             // Try to imitate what the official client sends after connecting.
-            frameManager.Register(new LatencyFrame());
-            frameManager.Register(new SynchronizationFrame());
             frameManager.Register(new SocialFrame());
             frameManager.Register(new QuestFrame());
             frameManager.Register(new ChatFrame());

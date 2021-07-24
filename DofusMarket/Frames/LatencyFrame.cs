@@ -8,20 +8,23 @@ namespace DofusMarket.Frames
 {
     internal class LatencyFrame : Frame
     {
-        private readonly Random _rnd = new();
-
         public override async Task ProcessAsync(CancellationToken cancellationToken)
         {
+            short sampleCount = 0;
             while (true)
             {
-                await ReceiveMessageAsync<BasicLatencyStatsRequestMessage>();
-                continue;
-                await SendMessageAsync(new BasicLatencyStatsMessage
+                var message = await ReceiveMessageAsync<INetworkMessage>();
+                sampleCount = (short)Math.Min(sampleCount + 1, 50);
+
+                if (message is BasicLatencyStatsRequestMessage)
                 {
-                    Latency = (short)_rnd.Next(20, 120),
-                    SampleCount = 50,
-                    Max = 50,
-                });
+                    await SendMessageAsync(new BasicLatencyStatsMessage
+                    {
+                        Latency = 24,
+                        SampleCount = sampleCount,
+                        Max = 50,
+                    });
+                }
             }
         }
     }

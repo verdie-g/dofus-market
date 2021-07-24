@@ -15,7 +15,6 @@ namespace Dofus.Messages
             writer.Write(Latency);
             writer.Write7BitEncodedInt(SampleCount);
             writer.Write7BitEncodedInt(Max);
-            writer.Write(new byte[48]); // ???
         }
 
         public void Deserialize(DofusBinaryReader reader)

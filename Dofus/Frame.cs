@@ -42,7 +42,7 @@ namespace Dofus
                 Type messageType = message.GetType();
                 foreach (var expectedMessageType in messageTypes)
                 {
-                    if (expectedMessageType == messageType)
+                    if (expectedMessageType.IsAssignableFrom(messageType))
                     {
                         return message;
                     }

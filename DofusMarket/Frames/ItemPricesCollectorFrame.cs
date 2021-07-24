@@ -96,6 +96,8 @@ namespace DofusMarket.Frames
                     await Task.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
                 }
             }
+
+            await SendMessageAsync(new LeaveDialogRequestMessage());
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Dofus.Types
 
         public new void Deserialize(DofusBinaryReader reader)
         {
+            base.Deserialize(reader);
             Name = reader.ReadString();
             Level = (ushort)reader.Read7BitEncodedInt();
         }

@@ -7,7 +7,8 @@ namespace Dofus.Types
     {
         internal new static int MessageId => 6930;
 
-        public uint MonsterCount { get; set; }
+        public uint Min { get; private set; }
+        public uint Max { get; private set; }
 
         public new void Serialize(DofusBinaryWriter writer)
         {
@@ -17,7 +18,8 @@ namespace Dofus.Types
         public new void Deserialize(DofusBinaryReader reader)
         {
             base.Deserialize(reader);
-            MonsterCount = (uint)reader.Read7BitEncodedInt();
+            Min = (uint)reader.Read7BitEncodedInt();
+            Max = (uint)reader.Read7BitEncodedInt();
         }
     }
 }
