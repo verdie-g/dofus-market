@@ -2,9 +2,11 @@
 
 namespace Dofus.Messages
 {
-    public class BasicLatencyStatsRequestMessage : INetworkMessage
+    public class MapFightCountMessage : INetworkMessage
     {
-        internal static int MessageId => 7797;
+        internal static int MessageId => 1367;
+
+        public ushort FightCount { get; set; }
 
         public void Serialize(DofusBinaryWriter writer)
         {
@@ -13,6 +15,7 @@ namespace Dofus.Messages
 
         public void Deserialize(DofusBinaryReader reader)
         {
+            FightCount = (ushort)reader.Read7BitEncodedInt();
         }
     }
 }

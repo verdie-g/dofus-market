@@ -1,10 +1,11 @@
-﻿using Dofus.Serialization;
+﻿using Dofus.Messages;
+using Dofus.Serialization;
 
-namespace Dofus.Messages
+namespace Dofus.Types
 {
-    public class BasicLatencyStatsRequestMessage : INetworkMessage
+    public class Item : INetworkMessage
     {
-        internal static int MessageId => 7797;
+        internal static int MessageId => 4071;
 
         public void Serialize(DofusBinaryWriter writer)
         {

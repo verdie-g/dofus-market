@@ -2,9 +2,11 @@
 
 namespace Dofus.Messages
 {
-    public class BasicLatencyStatsRequestMessage : INetworkMessage
+    public class GameContextRemoveElementMessage : INetworkMessage
     {
-        internal static int MessageId => 7797;
+        internal static int MessageId => 6263;
+
+        public long Id { get; private set; }
 
         public void Serialize(DofusBinaryWriter writer)
         {
@@ -13,6 +15,7 @@ namespace Dofus.Messages
 
         public void Deserialize(DofusBinaryReader reader)
         {
+            Id = reader.ReadInt64();
         }
     }
 }

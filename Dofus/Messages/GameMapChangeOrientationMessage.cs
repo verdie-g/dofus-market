@@ -1,10 +1,13 @@
 ﻿using Dofus.Serialization;
+using Dofus.Types;
 
 namespace Dofus.Messages
 {
-    public class BasicLatencyStatsRequestMessage : INetworkMessage
+    public class GameMapChangeOrientationMessage : INetworkMessage
     {
-        internal static int MessageId => 7797;
+        internal static int MessageId => 2457;
+
+        public ActorOrientation Orientation { get; private set; } = new();
 
         public void Serialize(DofusBinaryWriter writer)
         {
@@ -13,6 +16,7 @@ namespace Dofus.Messages
 
         public void Deserialize(DofusBinaryReader reader)
         {
+            Orientation = reader.ReadObject<ActorOrientation>();
         }
     }
 }

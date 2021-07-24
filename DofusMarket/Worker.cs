@@ -88,12 +88,13 @@ namespace DofusMarket
             DofusMetrics dofusMetrics = new(_influxDb, characterConfiguration.ServerId);
 
             // Try to imitate what the official client sends after connecting.
+            frameManager.Register(new LatencyFrame());
+            frameManager.Register(new SynchronizationFrame());
             frameManager.Register(new SocialFrame());
             frameManager.Register(new QuestFrame());
             frameManager.Register(new ChatFrame());
             frameManager.Register(new AllianceFrame());
             frameManager.Register(new WorldFrame());
-            frameManager.Register(new SynchronizationFrame());
             var itemPricesCollectorFrame = frameManager.Register(new ItemPricesCollectorFrame(dofusMetrics));
             // Send again a hardcoded flash key.
             await client.SendMessageAsync(new ClientKeyMessage { Key = "R7JdEA438imJUeyTlF#01" });
