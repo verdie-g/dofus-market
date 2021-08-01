@@ -22,6 +22,7 @@ namespace DofusMarket
 {
     internal class Worker : BackgroundService
     {
+        private static readonly DofusVersion DofusVersion = new() { Major = 2, Minor = 60, Code = 2, Build = 7, BuildType = BuildType.Release };
         private static readonly IPEndPoint DofusConnectionEndpoint = new(IPAddress.Parse("34.252.21.81"), 5555); // connection.host/port in config.xml
 
         private readonly CryptoService _cryptoService;
@@ -196,7 +197,7 @@ AQ==
                 AutoConnect = false,
                 UseCertificate = true,
                 UseLoginToken = false,
-                Version = new DofusVersion { Major = 2, Minor = 60, Code = 1, Build = 6, BuildType = BuildType.Release },
+                Version = DofusVersion,
                 Lang = "fr",
                 Credentials = encryptedCredentials,
                 ServerId = 0,
