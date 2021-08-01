@@ -50,12 +50,17 @@ namespace DofusMarket
                 AccountConfiguration[] accountConfigurations = _configuration
                     .GetSection("DofusMarket:Accounts")
                     .Get<AccountConfiguration[]>();
-                foreach (var account in accountConfigurations)
+                while (true)
                 {
-                    foreach (var character in account.Characters)
+                    foreach (var account in accountConfigurations)
                     {
-                        await ExecuteOnServer(account, character, cancellationToken);
+                        foreach (var character in account.Characters)
+                        {
+                            await ExecuteOnServer(account, character, cancellationToken);
+                        }
                     }
+
+                    await Task.Delay(TimeSpan.FromHours(6), cancellationToken);
                 }
             }
             catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
