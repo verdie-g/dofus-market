@@ -56,7 +56,10 @@ namespace DofusMarket
                     {
                         foreach (var character in account.Characters)
                         {
+                            Stopwatch sw = Stopwatch.StartNew();
                             await ExecuteOnServer(account, character, cancellationToken);
+                            _logger.LogInformation("Collected items for server {0} in {1}:{2}",
+                                character.ServerId, sw.Elapsed.Minutes, sw.Elapsed.Seconds);
                         }
                     }
 
