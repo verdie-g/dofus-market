@@ -11,7 +11,7 @@ namespace DofusMarket.Frames
 {
     internal class ItemPricesCollectorFrame : Frame
     {
-        private static readonly int[] SetSizes = { 1, 10, 100 };
+        private static readonly int[] StackSizes = { 1, 10, 100 };
 
         private readonly DofusMetrics _metrics;
 
@@ -74,8 +74,8 @@ namespace DofusMarket.Frames
                                     continue;
                                 }
 
-                                int setSize = SetSizes[i];
-                                _metrics.EmitItemPrice((int)itemId, (int)itemCategoryId, setSize, price);
+                                int stackSize = StackSizes[i];
+                                _metrics.EmitItemPrice((int)itemId, (int)itemCategoryId, stackSize, price);
                             }
                             await ReceiveMessageAsync<BasicNoOperationMessage>();
                             break;

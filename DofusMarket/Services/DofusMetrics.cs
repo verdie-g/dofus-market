@@ -17,14 +17,14 @@ namespace DofusMarket.Services
             _writeApi = influxDb.GetWriteApi();
         }
 
-        public void EmitItemPrice(int itemId, int categoryId, int setSize, int price)
+        public void EmitItemPrice(int itemId, int categoryId, int stackSize, int price)
         {
             var point = PointData
                 .Measurement("item_price")
                 .Tag("server_id", _serverId.ToString())
                 .Tag("item_id", itemId.ToString())
                 .Tag("category_id", categoryId.ToString())
-                .Tag("set_size", setSize.ToString())
+                .Tag("stack_size", stackSize.ToString())
                 .Field("value", price);
 
             _writeApi.WritePoint(point);
