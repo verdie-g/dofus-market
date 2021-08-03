@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dofus;
+using Dofus.Internationalization;
 using Dofus.Messages;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +24,7 @@ namespace DofusMarket.Frames
             await ReceiveMessageAsync<HelloGameMessage>();
             await SendMessageAsync(new AuthenticationTicketMessage
             {
-                Lang = "fr",
+                Lang = DofusLanguages.French,
                 Ticket = _ticket,
             });
 

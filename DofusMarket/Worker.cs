@@ -7,13 +7,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dofus;
+using Dofus.Internationalization;
 using Dofus.Messages;
 using Dofus.Serialization;
 using Dofus.Types;
 using DofusMarket.Frames;
 using DofusMarket.Models;
 using DofusMarket.Services;
-using InfluxDB.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,21 +22,25 @@ namespace DofusMarket
 {
     internal class Worker : BackgroundService
     {
-        private static readonly DofusVersion DofusVersion = new() { Major = 2, Minor = 60, Code = 2, Build = 7, BuildType = BuildType.Release };
+        private static readonly DofusVersion DofusVersion = new() { Major = 2, Minor = 60, Code = 2, Build = 10, BuildType = BuildType.Release };
         private static readonly IPEndPoint DofusConnectionEndpoint = new(IPAddress.Parse("34.252.21.81"), 5555); // connection.host/port in config.xml
 
         private readonly CryptoService _cryptoService;
-        private readonly InfluxDBClient _influxDb;
+        private readonly DofusMetrics _dofusMetrics;
+        private readonly DofusData _dofusData;
+        private readonly DofusTexts _dofusTexts;
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
 
-        public Worker(CryptoService cryptoService, InfluxDBClient influxDb, IHostApplicationLifetime appLifetime,
-            ILoggerFactory loggerFactory, IConfiguration configuration)
+        public Worker(CryptoService cryptoService, DofusMetrics dofusMetrics, DofusData dofusData, DofusTexts dofusTexts,
+            IHostApplicationLifetime appLifetime, ILoggerFactory loggerFactory, IConfiguration configuration)
         {
             _cryptoService = cryptoService;
-            _influxDb = influxDb;
+            _dofusMetrics = dofusMetrics;
+            _dofusData = dofusData;
+            _dofusTexts = dofusTexts;
             _appLifetime = appLifetime;
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger(typeof(DofusClient));
@@ -96,15 +100,14 @@ namespace DofusMarket
                 new GameServerApproachFrame(authenticationResult.Ticket, characterConfiguration.CharacterId));
             await gameServerApproachFrame.ProcessTask;
 
-            DofusMetrics dofusMetrics = new(_influxDb, characterConfiguration.ServerId);
-
             // Try to imitate what the official client sends after connecting.
             frameManager.Register(new SocialFrame());
             frameManager.Register(new QuestFrame());
             frameManager.Register(new ChatFrame());
             frameManager.Register(new AllianceFrame());
             frameManager.Register(new WorldFrame());
-            var itemPricesCollectorFrame = frameManager.Register(new ItemPricesCollectorFrame(dofusMetrics));
+            var itemPricesCollectorFrame = frameManager.Register(
+                new ItemPricesCollectorFrame(characterConfiguration.ServerId, _dofusMetrics, _dofusData, _dofusTexts));
             // Send again a hardcoded flash key.
             await client.SendMessageAsync(new ClientKeyMessage { Key = "R7JdEA438imJUeyTlF#01" });
             await client.SendMessageAsync(new GameContextCreateRequestMessage());
@@ -206,7 +209,7 @@ AQ==
                 UseCertificate = true,
                 UseLoginToken = false,
                 Version = DofusVersion,
-                Lang = "fr",
+                Lang = DofusLanguages.French,
                 Credentials = encryptedCredentials,
                 ServerId = 0,
                 SessionOptionalSalt = 0,

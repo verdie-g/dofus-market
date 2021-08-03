@@ -8,22 +8,20 @@ namespace DofusMarket.Services
     {
         private readonly InfluxDBClient _influxDb;
         private readonly WriteApi _writeApi;
-        private readonly int _serverId;
 
-        public DofusMetrics(InfluxDBClient influxDb, int serverId)
+        public DofusMetrics(InfluxDBClient influxDb)
         {
             _influxDb = influxDb;
-            _serverId = serverId;
             _writeApi = influxDb.GetWriteApi();
         }
 
-        public void EmitItemPrice(int itemId, int categoryId, int stackSize, int price)
+        public void EmitItemPrice(string serverName, string itemName, string itemTypeName, int stackSize, int price)
         {
             var point = PointData
                 .Measurement("item_price")
-                .Tag("server_id", _serverId.ToString())
-                .Tag("item_id", itemId.ToString())
-                .Tag("category_id", categoryId.ToString())
+                .Tag("server_name_fr", serverName)
+                .Tag("item_name_fr", itemName)
+                .Tag("item_type_name_fr", itemTypeName)
                 .Tag("stack_size", stackSize.ToString())
                 .Field("value", price);
 
