@@ -19,12 +19,12 @@ namespace DofusMarket.Frames
         private readonly DofusData _dofusData;
         private readonly DofusTexts _dofusTexts;
 
-        public ItemPricesCollectorFrame(int serverId, DofusMetrics metrics, DofusData dofusData, DofusTexts dofusTexts)
+        public ItemPricesCollectorFrame(string serverName, DofusMetrics metrics, DofusData dofusData, DofusTexts dofusTexts)
         {
             _metrics = metrics;
             _dofusData = dofusData;
             _dofusTexts = dofusTexts;
-            _serverName = GetDataName(serverId, "Servers");
+            _serverName = serverName;
         }
 
         public override async Task ProcessAsync(CancellationToken cancellationToken)

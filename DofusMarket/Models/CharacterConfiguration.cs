@@ -2,7 +2,7 @@
 {
     internal class CharacterConfiguration
     {
-        public int ServerId { get; set; }
+        public string ServerName { get; set; } = string.Empty;
         public long CharacterId { get; set; }
     }
 }

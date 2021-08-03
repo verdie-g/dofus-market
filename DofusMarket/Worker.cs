@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -63,7 +64,7 @@ namespace DofusMarket
                             Stopwatch sw = Stopwatch.StartNew();
                             await ExecuteOnServer(account, character, cancellationToken);
                             _logger.LogInformation("Collected items for server {0} in {1}:{2}",
-                                character.ServerId, sw.Elapsed.Minutes, sw.Elapsed.Seconds);
+                                character.ServerName, sw.Elapsed.Minutes, sw.Elapsed.Seconds);
                         }
                     }
 
@@ -85,7 +86,7 @@ namespace DofusMarket
             CharacterConfiguration characterConfiguration, CancellationToken cancellationToken)
         {
             var authenticationResult = await AuthenticateAsync(DofusConnectionEndpoint, accountConfiguration,
-                characterConfiguration.ServerId, cancellationToken);
+                characterConfiguration.ServerName, cancellationToken);
             if (authenticationResult == null)
             {
                 return;
@@ -107,7 +108,7 @@ namespace DofusMarket
             frameManager.Register(new AllianceFrame());
             frameManager.Register(new WorldFrame());
             var itemPricesCollectorFrame = frameManager.Register(
-                new ItemPricesCollectorFrame(characterConfiguration.ServerId, _dofusMetrics, _dofusData, _dofusTexts));
+                new ItemPricesCollectorFrame(characterConfiguration.ServerName, _dofusMetrics, _dofusData, _dofusTexts));
             // Send again a hardcoded flash key.
             await client.SendMessageAsync(new ClientKeyMessage { Key = "R7JdEA438imJUeyTlF#01" });
             await client.SendMessageAsync(new GameContextCreateRequestMessage());
@@ -116,7 +117,7 @@ namespace DofusMarket
         }
 
         private async Task<AuthenticationResult?> AuthenticateAsync(EndPoint connectionEndpoint,
-            AccountConfiguration accountConfiguration, int serverId, CancellationToken cancellationToken)
+            AccountConfiguration accountConfiguration, string serverName, CancellationToken cancellationToken)
         {
             using DofusClient client = new(connectionEndpoint, _loggerFactory.CreateLogger(typeof(DofusClient)));
 
@@ -148,8 +149,14 @@ namespace DofusMarket
                         _logger.LogInformation("Identification succeed");
                         break;
 
-                    case ServerListMessage:
-                        await client.SendMessageAsync(new ServerSelectionMessage { ServerId = (short)serverId });
+                    case ServerListMessage serverList:
+                        var server = serverList.Servers.First(s =>
+                        {
+                            var serverObject = _dofusData.GetData(s.Id, "Servers");
+                            string serverObjectName = _dofusTexts.GetText((int)serverObject["nameId"]!, DofusLanguages.French);
+                            return serverName == serverObjectName;
+                        });
+                        await client.SendMessageAsync(new ServerSelectionMessage { ServerId = server.Id });
                         break;
 
                     case SelectedServerRefusedMessage selectedServerRefused:
