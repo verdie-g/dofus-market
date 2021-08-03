@@ -24,7 +24,7 @@ namespace DofusMarket.Frames
             _metrics = metrics;
             _dofusData = dofusData;
             _dofusTexts = dofusTexts;
-            _serverName = GetServerName(serverId);
+            _serverName = GetDataName(serverId, "Servers");
         }
 
         public override async Task ProcessAsync(CancellationToken cancellationToken)
@@ -73,8 +73,8 @@ namespace DofusMarket.Frames
                         typeof(BasicNoOperationMessage)))
                     {
                         case ExchangeTypesItemsExchangerDescriptionForUserMessage item:
-                            string itemName = GetItemName((int)itemId);
-                            string itemTypeName = GetItemTypeName((int)itemTypeId);
+                            string itemName = GetDataName((int)itemId, "Items");
+                            string itemTypeName = GetDataName((int)itemTypeId, "ItemTypes");
                             for (int i = 0; i < item.ItemTypeDescriptions[0].Prices.Length; i += 1)
                             {
                                 int price = (int)item.ItemTypeDescriptions[0].Prices[i];
@@ -109,22 +109,10 @@ namespace DofusMarket.Frames
             await SendMessageAsync(new LeaveDialogRequestMessage());
         }
 
-        private string GetItemName(int id)
+        private string GetDataName(int dataId, string dataType)
         {
-            var item = _dofusData.GetData(id, "Items");
-            return _dofusTexts.GetText((int)item["nameId"]!, DofusLanguages.French);
-        }
-
-        private string GetItemTypeName(int id)
-        {
-            var itemType = _dofusData.GetData(id, "ItemTypes");
-            return _dofusTexts.GetText((int)itemType["nameId"]!, DofusLanguages.French);
-        }
-
-        private string GetServerName(int id)
-        {
-            var server = _dofusData.GetData(id, "Servers");
-            return _dofusTexts.GetText((int)server["nameId"]!, DofusLanguages.French);
+            var data = _dofusData.GetData(dataId, dataType);
+            return _dofusTexts.GetText((int)data["nameId"]!, DofusLanguages.French);
         }
     }
 }
