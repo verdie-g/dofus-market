@@ -3,6 +3,6 @@
     internal class CharacterConfiguration
     {
         public string ServerName { get; set; } = string.Empty;
-        public long CharacterId { get; set; }
+        public string CharacterName { get; set; } = string.Empty;
     }
 }

@@ -98,7 +98,7 @@ namespace DofusMarket
             frameManager.Register(new LatencyFrame());
 
             var gameServerApproachFrame = frameManager.Register(
-                new GameServerApproachFrame(authenticationResult.Ticket, characterConfiguration.CharacterId));
+                new GameServerApproachFrame(authenticationResult.Ticket, characterConfiguration.CharacterName));
             await gameServerApproachFrame.ProcessTask;
 
             // Try to imitate what the official client sends after connecting.

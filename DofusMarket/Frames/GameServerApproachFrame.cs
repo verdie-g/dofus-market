@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dofus;
@@ -11,12 +12,12 @@ namespace DofusMarket.Frames
     internal class GameServerApproachFrame : Frame
     {
         private readonly string _ticket;
-        private readonly long _characterId;
+        private readonly string _characterName;
 
-        public GameServerApproachFrame(string ticket, long characterId)
+        public GameServerApproachFrame(string ticket, string characterName)
         {
             _ticket = ticket;
-            _characterId = characterId;
+            _characterName = characterName;
         }
 
         public override async Task ProcessAsync(CancellationToken cancellationToken)
@@ -50,8 +51,9 @@ namespace DofusMarket.Frames
                         break;
             }
 
-            await ReceiveMessageAsync<CharactersListMessage>();
-            await SendMessageAsync(new CharacterSelectionMessage { Id = (ulong)_characterId });
+            var characterList = await ReceiveMessageAsync<CharactersListMessage>();
+            var character = characterList.Characters.First(c => c.Name == _characterName);
+            await SendMessageAsync(new CharacterSelectionMessage { Id = character.Id });
 
             await ReceiveMessageAsync<CharacterSelectedSuccessMessage>();
         }
