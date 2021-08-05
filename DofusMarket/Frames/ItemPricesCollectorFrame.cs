@@ -28,7 +28,7 @@ namespace DofusMarket.Frames
             await SendMessageAsync(new MapInformationsRequestMessage { MapId = currentMap.MapId });
 
             var mapData = await ReceiveMessageAsync<MapComplementaryInformationsDataMessage>();
-            uint elementId = 515220;
+            uint elementId = 515264;
             uint skillInstanceUid = mapData.InteractiveElements.First(e => e.ElementId == elementId).EnabledSkills[0].SkillInstanceUid;
             await SendMessageAsync(new InteractiveUseRequestMessage
             {
