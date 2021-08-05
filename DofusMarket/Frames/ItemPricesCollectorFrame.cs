@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dofus;
-using Dofus.Internationalization;
 using Dofus.Messages;
 using DofusMarket.Services;
 using Microsoft.Extensions.Logging;
@@ -14,17 +13,13 @@ namespace DofusMarket.Frames
     {
         private static readonly int[] StackSizes = { 1, 10, 100 };
 
-        private readonly string _serverName;
+        private readonly int _serverId;
         private readonly DofusMetrics _metrics;
-        private readonly DofusData _dofusData;
-        private readonly DofusTexts _dofusTexts;
 
-        public ItemPricesCollectorFrame(string serverName, DofusMetrics metrics, DofusData dofusData, DofusTexts dofusTexts)
+        public ItemPricesCollectorFrame(int serverId, DofusMetrics metrics)
         {
+            _serverId = serverId;
             _metrics = metrics;
-            _dofusData = dofusData;
-            _dofusTexts = dofusTexts;
-            _serverName = serverName;
         }
 
         public override async Task ProcessAsync(CancellationToken cancellationToken)
@@ -73,8 +68,6 @@ namespace DofusMarket.Frames
                         typeof(BasicNoOperationMessage)))
                     {
                         case ExchangeTypesItemsExchangerDescriptionForUserMessage item:
-                            string itemName = GetDataName((int)itemId, "Items");
-                            string itemTypeName = GetDataName((int)itemTypeId, "ItemTypes");
                             for (int i = 0; i < item.ItemTypeDescriptions[0].Prices.Length; i += 1)
                             {
                                 int price = (int)item.ItemTypeDescriptions[0].Prices[i];
@@ -84,7 +77,7 @@ namespace DofusMarket.Frames
                                 }
 
                                 int stackSize = StackSizes[i];
-                                _metrics.EmitItemPrice(_serverName, itemName, itemTypeName, stackSize, price);
+                                _metrics.WriteItemPrice(_serverId, (int)itemId, (int)itemTypeId, stackSize, price);
                             }
                             await ReceiveMessageAsync<BasicNoOperationMessage>();
                             break;
@@ -107,12 +100,6 @@ namespace DofusMarket.Frames
             }
 
             await SendMessageAsync(new LeaveDialogRequestMessage());
-        }
-
-        private string GetDataName(int dataId, string dataType)
-        {
-            var data = _dofusData.GetData(dataId, dataType);
-            return _dofusTexts.GetText((int)data["nameId"]!, DofusLanguages.French);
         }
     }
 }

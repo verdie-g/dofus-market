@@ -1,37 +1,31 @@
-﻿using System;
-using InfluxDB.Client;
-using InfluxDB.Client.Writes;
+﻿using Npgsql;
 
 namespace DofusMarket.Services
 {
-    internal class DofusMetrics : IDisposable
+    internal class DofusMetrics
     {
-        private readonly InfluxDBClient _influxDb;
-        private readonly WriteApi _writeApi;
+        private readonly string _connString;
 
-        public DofusMetrics(InfluxDBClient influxDb)
+        public DofusMetrics(string connString)
         {
-            _influxDb = influxDb;
-            _writeApi = influxDb.GetWriteApi();
+            _connString = connString;
         }
 
-        public void EmitItemPrice(string serverName, string itemName, string itemTypeName, int stackSize, int price)
+        public void WriteItemPrice(int serverId, int itemId, int itemTypeId, int stackSize, int price)
         {
-            var point = PointData
-                .Measurement("item_price")
-                .Tag("server_name_fr", serverName)
-                .Tag("item_name_fr", itemName)
-                .Tag("item_type_name_fr", itemTypeName)
-                .Tag("stack_size", stackSize.ToString())
-                .Field("value", price);
+            using NpgsqlConnection conn = new(_connString);
+            conn.Open();
 
-            _writeApi.WritePoint(point);
-        }
-
-        public void Dispose()
-        {
-            _writeApi.Dispose();
-            _influxDb.Dispose();
+            using NpgsqlCommand cmd = new(@"
+INSERT INTO item_prices(time, server_id, item_id, item_type_id, stack_size, price)
+VALUES (NOW(), @server_id, @item_id, @item_type_id, @stack_size, @price);",
+                conn);
+            cmd.Parameters.AddWithValue("server_id", serverId);
+            cmd.Parameters.AddWithValue("item_id", itemId);
+            cmd.Parameters.AddWithValue("item_type_id", itemTypeId);
+            cmd.Parameters.AddWithValue("stack_size", stackSize);
+            cmd.Parameters.AddWithValue("price", price);
+            cmd.ExecuteNonQuery();
         }
     }
 }
