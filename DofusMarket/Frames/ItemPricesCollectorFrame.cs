@@ -24,15 +24,23 @@ namespace DofusMarket.Frames
 
         public override async Task ProcessAsync(CancellationToken cancellationToken)
         {
+            const long bontaMapId = 146741;
+            const uint bontaNpcId = 515264;
+
             var currentMap = await ReceiveMessageAsync<CurrentMapMessage>();
+            if (currentMap.MapId != bontaMapId)
+            {
+                Logger.LogError("Not on Bonta map");
+                return;
+            }
+
             await SendMessageAsync(new MapInformationsRequestMessage { MapId = currentMap.MapId });
 
             var mapData = await ReceiveMessageAsync<MapComplementaryInformationsDataMessage>();
-            uint elementId = 515264;
-            uint skillInstanceUid = mapData.InteractiveElements.First(e => e.ElementId == elementId).EnabledSkills[0].SkillInstanceUid;
+            uint skillInstanceUid = mapData.InteractiveElements.First(e => e.ElementId == bontaNpcId).EnabledSkills[0].SkillInstanceUid;
             await SendMessageAsync(new InteractiveUseRequestMessage
             {
-                ElemId = elementId,
+                ElemId = bontaNpcId,
                 SkillInstanceUid = skillInstanceUid,
             });
 
