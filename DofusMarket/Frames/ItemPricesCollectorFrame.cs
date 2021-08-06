@@ -79,8 +79,10 @@ namespace DofusMarket.Frames
                             for (int i = 0; i < StackSizes.Length; i += 1)
                             {
                                 int price = (int)item.ItemTypeDescriptions
-                                    .Where(o => o.Prices[i] != 0)
-                                    .Average(o => (int)o.Prices[i]);
+                                    .Select(o => (int)o.Prices[i])
+                                    .Where(p => p != 0)
+                                    .DefaultIfEmpty()
+                                    .Average();
                                 if (price == 0) // 0 means that the item is not available for this set size.
                                 {
                                     continue;
