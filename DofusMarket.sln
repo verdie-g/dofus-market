@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DofusMarket", "DofusMarket\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dofus", "Dofus\Dofus.csproj", "{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dofus.DataExporter", "Dofus.DataExporter\Dofus.DataExporter.csproj", "{20AB3B6D-A65E-4F2D-B6DF-787C83DBFB4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B70E8BC-AF55-4534-9E3B-BA3095A04D0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20AB3B6D-A65E-4F2D-B6DF-787C83DBFB4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20AB3B6D-A65E-4F2D-B6DF-787C83DBFB4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20AB3B6D-A65E-4F2D-B6DF-787C83DBFB4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20AB3B6D-A65E-4F2D-B6DF-787C83DBFB4C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

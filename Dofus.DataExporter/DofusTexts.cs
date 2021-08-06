@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Dofus.DataReader;
 using Dofus.Internationalization;
 
-namespace DofusMarket.Services
+namespace Dofus.DataExporter
 {
     internal class DofusTexts
     {
@@ -33,6 +34,11 @@ namespace DofusMarket.Services
         public string GetText(int textId, string lang)
         {
             return _textsByLanguages[lang][textId];
+        }
+
+        public bool TryGetText(int textId, string lang, [MaybeNullWhen(false)] out string text)
+        {
+            return _textsByLanguages[lang].TryGetValue(textId, out text);
         }
     }
 }

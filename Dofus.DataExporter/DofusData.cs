@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Dofus.DataReader;
 
-namespace DofusMarket.Services
+namespace Dofus.DataExporter
 {
     internal class DofusData
     {
@@ -28,6 +28,11 @@ namespace DofusMarket.Services
         private DofusData(Dictionary<string, Dictionary<int, Dictionary<string, object?>>> data)
         {
             _data = data;
+        }
+
+        public Dictionary<int, Dictionary<string, object?>> GetDataForType(string type)
+        {
+            return _data[type];
         }
 
         public Dictionary<string, object?> GetData(int id, string type)
