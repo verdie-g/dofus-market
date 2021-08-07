@@ -52,18 +52,24 @@ namespace DofusMarket
                     .Get<AccountConfiguration[]>();
                 while (true)
                 {
+                    Stopwatch sw = Stopwatch.StartNew();
                     foreach (var account in accountConfigurations)
                     {
                         foreach (var character in account.Characters)
                         {
-                            Stopwatch sw = Stopwatch.StartNew();
+                            TimeSpan serverStart = sw.Elapsed;
                             await ExecuteOnServer(account, character, cancellationToken);
-                            _logger.LogInformation("Collected items for server {0} in {1}:{2}",
-                                character.ServerId, sw.Elapsed.Minutes, sw.Elapsed.Seconds);
+                            _logger.LogInformation("Collected items for server {0} in {1}",
+                                character.ServerId, sw.Elapsed - serverStart);
                         }
                     }
 
-                    await Task.Delay(TimeSpan.FromHours(6), cancellationToken);
+                    var waitTime = TimeSpan.FromHours(6) - sw.Elapsed;
+                    if (waitTime > TimeSpan.Zero)
+                    {
+                        _logger.LogInformation("Waiting {0} before next run", waitTime);
+                        await Task.Delay(waitTime, cancellationToken);
+                    }
                 }
             }
             catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
