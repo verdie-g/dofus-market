@@ -1,0 +1,100 @@
+---
+- name: set up the apt repository to use mainline nginx packages
+  apt_repository:
+    repo: deb http://nginx.org/packages/mainline/debian buster nginx
+    state: present
+    filename: nginx
+    update_cache: no
+
+- name: add nginx package signing key to the list of trusted keys
+  apt_key:
+    id: 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+    url: https://nginx.org/keys/nginx_signing.key
+
+- name: install Nginx
+  apt:
+    name: "nginx={{ nginx_version }}-1~buster"
+    update_cache: yes
+
+- name: download opentracing for nginx
+  unarchive:
+    src: "https://github.com/opentracing-contrib/nginx-opentracing/releases/download/v{{ nginx_opentracing_version }}/linux-amd64-nginx-{{ nginx_version }}-ngx_http_module.so.tgz"
+    dest: /usr/lib/nginx/modules
+    remote_src: True
+
+- name: download C++ tracer for Datadog
+  get_url:
+    url: "https://github.com/DataDog/dd-opentracing-cpp/releases/download/v{{ datadog_opentracing_version }}/linux-amd64-libdd_opentracing_plugin.so.gz"
+    dest: /tmp
+  register: datadog_tracer
+
+- name: uncompress tracer for Datadog
+  shell: "gunzip -c {{ datadog_tracer.dest }} > /usr/local/lib/libdd_opentracing_plugin.so"
+
+- name: create snippets folder
+  file:
+    path: /etc/nginx/snippets
+    state: directory
+    mode: 0755
+
+- name: create Dofus Market SSL snippet file
+  template:
+    src: nginx-ssl-snippet.conf.j2
+    dest: /etc/nginx/snippets/dofus-market-ssl.conf
+    mode: 0644
+
+- name: create Nginx configuration file
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: 0644
+
+- name: create sites-enabled folder
+  file:
+    path: /etc/nginx/sites-enabled
+    state: directory
+    mode: 0755
+
+- name: create Dofus Market virtual server configuration file
+  template:
+    src: "nginx-{{ dofus_market_domain_name }}.j2"
+    dest: "/etc/nginx/sites-enabled/{{ dofus_market_domain_name }}"
+    mode: 0644
+
+- name: Create Datadog tracing configuration file
+  template:
+    src: dd-config.json.j2
+    dest: /etc/nginx/dd-config.json
+    mode: 0644
+
+- name: Create Nginx log rotation file
+  template:
+    src: nginx-logrotate.j2
+    dest: /etc/logrotate.d/nginx
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Add Nginx status module
+  template:
+    src: nginx-status.conf.j2
+    dest: /etc/nginx/conf.d/status.conf
+    mode: 0644
+
+- name: Open HTTP port
+  ufw:
+    rule: allow
+    port: "80"
+    proto: tcp
+
+- name: Open HTTPS port
+  ufw:
+    rule: allow
+    port: "443"
+    proto: tcp
+
+- name: Restart Nginx
+  service:
+    name: nginx
+    enabled: yes
+    state: restarted

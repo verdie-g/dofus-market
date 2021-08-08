@@ -1,0 +1,91 @@
+---
+- name: create user
+  user:
+    name: "{{ dofus_market_bot_user }}"
+    comment: Owner of the Dofus Market bot
+
+- name: build
+  become: false
+  command: "dotnet publish -c Release {{ playbook_dir | dirname }}/src/Dofus.DataExporter --output /tmp/{{ dofus_data_exporter_path | basename }}_new"
+  delegate_to: localhost
+
+- name: compress locally
+  archive:
+    path: "/tmp/{{ dofus_data_exporter_path | basename }}_new"
+    dest: "/tmp/{{ dofus_data_exporter_path | basename }}_new.tgz"
+  delegate_to: localhost
+  become: false
+
+- name: copy to host and decompress
+  unarchive:
+    src: "/tmp/{{ dofus_data_exporter_path | basename }}_new.tgz"
+    dest: "{{ dofus_data_exporter_path | dirname }}"
+    mode: u=rwX,g=,o=
+    owner: "{{ dofus_market_bot_user }}"
+    group: "{{ dofus_market_bot_user }}"
+  become_user: "{{ dofus_market_bot_user }}" # https://github.com/ansible/ansible/issues/35426
+
+- name: check that a version is already present
+  stat:
+    path: "{{ dofus_data_exporter_path }}"
+  register: dofus_data_exporter_path_stat_result
+
+- name: swap old and new version (1/2)
+  command: "mv {{ dofus_data_exporter_path }} {{ dofus_data_exporter_path }}_old"
+  when: dofus_data_exporter_path_stat_result.stat.exists
+
+- name: swap old and new version (2/2)
+  command: "mv {{ dofus_data_exporter_path }}_new {{ dofus_data_exporter_path }}"
+
+- name: clean old version
+  file:
+    path: "{{ dofus_data_exporter_path }}_old"
+    state: absent
+  when: dofus_data_exporter_path_stat_result.stat.exists
+
+- name: clean local archive
+  file:
+    path: "/tmp/{{ dofus_data_exporter_path | basename }}_new.tgz"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: clean local build
+  file:
+    path: "/tmp/{{ dofus_data_exporter_path | basename }}_new"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: create data directories
+  file:
+    path: "{{ dofus_data_exporter_path }}/{{ item }}"
+    state: directory
+    owner: "{{ dofus_market_bot_user }}"
+    group: "{{ dofus_market_bot_user }}"
+    mode: 0775
+  loop:
+    - data
+    - data/common
+    - data/i18n
+
+- name: copy Dofus data files to remote
+  copy:
+    src: "{{ dofus_client_local_path }}/data/{{ item }}"
+    dest: "{{ dofus_data_exporter_path }}/data/{{ item }}"
+    owner: "{{ dofus_market_bot_user }}"
+    group: "{{ dofus_market_bot_user }}"
+    mode: 0644
+  loop:
+    - i18n/i18n_fr.d2i
+    - common/Servers.d2o
+    - common/Items.d2o
+
+- name: run
+  become_user: "{{ dofus_market_bot_user }}"
+  command:
+    cmd: "/usr/bin/dotnet {{ dofus_data_exporter_path }}/Dofus.DataExporter.dll"
+    chdir: "{{ dofus_data_exporter_path }}"
+  environment:
+    DOFUS_PATH: "{{ dofus_data_exporter_path }}"
+    CONNECTION_STRING: "Host=localhost;Database={{ dofus_market_db }};Username={{ dofus_market_bot_db_user }};Password={{ dofus_market_bot_db_user_password }};Application Name={{ dofus_market_bot_user }}"

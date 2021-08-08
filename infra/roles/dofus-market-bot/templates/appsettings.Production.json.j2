@@ -1,0 +1,67 @@
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "Theme": "Serilog.Sinks.SystemConsole.Themes.ConsoleTheme::None, Serilog.Sinks.Console"
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "Path": "{{ dofus_market_bot_log_file }}",
+          "Formatter": "Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact",
+          "Buffered": true,
+          "FlushToDiskInterval": "00:00:15"
+        }
+      }
+    ]
+  },
+  "DofusMarket": {
+    "Accounts": [
+      {
+        "AccountName": "{{ dofus_account1_name }}",
+        "Password": "{{ dofus_account1_password }}",
+        "CertificateId": "{{ dofus_account1_certificate_id }}",
+        "CertificateHash": "{{ dofus_account1_certificate_hash }}",
+        "Characters": [
+          {
+            "ServerId": 36, // Agride
+            "CharacterName": "Dofs-Market"
+          },
+          {
+            "ServerId": 50, // Ombre
+            "CharacterName": "Dofs-Market"
+          },
+          {
+            "ServerId": 205, // Meriana
+            "CharacterName": "Dofu-Market"
+          },
+          {
+            "ServerId": 207, // Ush
+            "CharacterName": "Dofs-Market"
+          },
+          {
+            "ServerId": 208, // Julith
+            "CharacterName": "Dofs-Market"
+          },
+          {
+            "ServerId": 210, // Merkator
+            "CharacterName": "Dofu-market"
+          }
+        ]
+      }
+    ]
+  },
+  "ConnectionStrings": {
+    "DofusMarket": "Host=localhost;Database={{ dofus_market_db }};Username={{ dofus_market_bot_db_user }};Password={{ dofus_market_bot_db_user_password }};Application Name={{ dofus_market_bot_service_name }}"
+  }
+}

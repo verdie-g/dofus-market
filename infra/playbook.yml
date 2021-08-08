@@ -1,0 +1,10 @@
+- hosts: all
+  become: yes
+  roles:
+    # - postgresql
+    # - grafana
+    # - nginx
+    # - datadog
+    # - dotnet
+    # - dofus-data-exporter
+    - dofus-market-bot
