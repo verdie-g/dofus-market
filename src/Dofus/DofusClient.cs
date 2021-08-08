@@ -244,7 +244,8 @@ namespace Dofus
                 return;
             }
 
-            Debug.Assert(_messagesChannel.Writer.TryWrite(message));
+            bool written = _messagesChannel.Writer.TryWrite(message);
+            Debug.Assert(written);
         }
 
         private int GetMessageId(short messageHeader)
