@@ -5,6 +5,7 @@ namespace Dofus.Messages
     public class ServerSelectionMessage : INetworkMessage
     {
         internal static int MessageId => 6327;
+
         public short ServerId { get; init; }
 
         public void Serialize(DofusBinaryWriter writer)
