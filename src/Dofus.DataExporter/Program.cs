@@ -9,15 +9,43 @@ namespace Dofus.DataExporter
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             string dofusPath = Environment.GetEnvironmentVariable("DOFUS_PATH") ?? throw new Exception("DOFUS_PATH not set");
             string connString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? throw new Exception("CONNECTION_STRING not set");
+            Console.WriteLine(connString);
 
             DofusData dofusData = DofusData.New(Path.Combine(dofusPath, "data/common"));
             DofusTexts dofusTexts = DofusTexts.New(Path.Combine(dofusPath, "data/i18n"));
+            await CreateSchemaAsync(connString);
             await InsertServersAsync(connString, dofusData, dofusTexts);
             await InsertItemsAsync(connString, dofusData, dofusTexts);
+        }
+
+        private static Task CreateSchemaAsync(string connString)
+        {
+            return RunQueryAsync(connString, @"
+CREATE TABLE IF NOT EXISTS servers (
+    id      INT  NOT NULL PRIMARY KEY,
+    name_fr TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS items (
+    id      INT  NOT NULL PRIMARY KEY,
+    name_fr TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS item_prices (
+    time         TIMESTAMPTZ NOT NULL,
+    server_id    INT         NOT NULL,
+    item_id      INT         NOT NULL,
+    item_type_id INT         NOT NULL,
+    stack_size   INT         NOT NULL,
+    price        INT         NOT NULL
+);
+
+SELECT create_hypertable('item_prices', 'time', if_not_exists => TRUE);
+");
         }
 
         private static async Task InsertServersAsync(string connString, DofusData dofusData, DofusTexts dofusTexts)
