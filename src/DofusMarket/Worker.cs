@@ -72,7 +72,7 @@ namespace DofusMarket
                     }
                 }
             }
-            catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 throw;
             }
