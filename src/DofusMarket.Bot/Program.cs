@@ -2,6 +2,7 @@ using DofusMarket.Bot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace DofusMarket.Bot
 {
@@ -23,7 +24,8 @@ namespace DofusMarket.Bot
                     services.AddSingleton(new DofusMetrics(
                         hostContext.Configuration["DofusMarket:Api:Host"],
                         hostContext.Configuration["DofusMarket:Api:Username"],
-                        hostContext.Configuration["DofusMarket:Api:Password"]));
+                        hostContext.Configuration["DofusMarket:Api:Password"],
+                        new SerilogLoggerProvider().CreateLogger(typeof(DofusMetrics).FullName)));
                 })
                 .Build().Run();
         }
