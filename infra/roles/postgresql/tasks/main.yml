@@ -50,8 +50,8 @@
 - name: create dofus market bot PostgreSQL user
   become_user: postgres
   postgresql_user:
-    name: "{{ dofus_market_bot_db_user }}"
-    password: "{{ dofus_market_bot_db_user_password }}"
+    name: "{{ dofus_market_api_db_user }}"
+    password: "{{ dofus_market_api_db_user_password }}"
 
 - name: create grafana PostgreSQL user
   become_user: postgres

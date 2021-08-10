@@ -9,12 +9,6 @@
     },
     "WriteTo": [
       {
-        "Name": "Console",
-        "Args": {
-          "Theme": "Serilog.Sinks.SystemConsole.Themes.ConsoleTheme::None, Serilog.Sinks.Console"
-        }
-      },
-      {
         "Name": "File",
         "Args": {
           "Path": "{{ dofus_market_bot_log_file }}",
@@ -59,9 +53,11 @@
           }
         ]
       }
-    ]
-  },
-  "ConnectionStrings": {
-    "DofusMarket": "Host=localhost;Database={{ dofus_market_db }};Username={{ dofus_market_bot_db_user }};Password={{ dofus_market_bot_db_user_password }};Application Name={{ dofus_market_bot_service_name }}"
+    ],
+    "Api": {
+      "Host": "https://api.{{ dofus_market_domain_name }}",
+      "Username": "{{ dofus_market_api_auth_user }}",
+      "Password": "{{ dofus_market_api_auth_password }}"
+    }
   }
 }

@@ -12,7 +12,7 @@
 
 - name: build
   become: false
-  command: "dotnet publish -c Release {{ playbook_dir | dirname }}/src/DofusMarket --output /tmp/{{ dofus_market_bot_path | basename }}_new"
+  command: "dotnet publish -c Release {{ playbook_dir | dirname }}/src/DofusMarket.Bot --output /tmp/{{ dofus_market_bot_path | basename }}_new"
   delegate_to: localhost
 
 - name: compress locally

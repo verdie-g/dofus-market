@@ -1,10 +1,16 @@
-- hosts: all
+- hosts: apiserver
   become: yes
   roles:
-    # - postgresql
-    # - grafana
-    # - nginx
+    - postgresql
+    - grafana
+    - nginx
+    - datadog
+    - dotnet
+    - dofus-data-exporter
+    - dofus-market-api
+- hosts: botserver
+  become: yes
+  roles:
     # - datadog
     # - dotnet
-    # - dofus-data-exporter
     - dofus-market-bot

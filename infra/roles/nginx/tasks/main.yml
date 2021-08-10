@@ -55,19 +55,22 @@
     state: directory
     mode: 0755
 
-- name: create Dofus Market virtual server configuration file
+- name: create virtual server configuration files
   template:
-    src: "nginx-{{ dofus_market_domain_name }}.j2"
-    dest: "/etc/nginx/sites-enabled/{{ dofus_market_domain_name }}"
+    src: "nginx-{{ item }}.j2"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
     mode: 0644
+  loop:
+    - "{{ dofus_market_domain_name }}"
+    - "api.{{ dofus_market_domain_name }}"
 
-- name: Create Datadog tracing configuration file
+- name: create Datadog tracing configuration file
   template:
     src: dd-config.json.j2
     dest: /etc/nginx/dd-config.json
     mode: 0644
 
-- name: Create Nginx log rotation file
+- name: create Nginx log rotation file
   template:
     src: nginx-logrotate.j2
     dest: /etc/logrotate.d/nginx
@@ -75,25 +78,25 @@
     owner: root
     group: root
 
-- name: Add Nginx status module
+- name: add Nginx status module
   template:
     src: nginx-status.conf.j2
     dest: /etc/nginx/conf.d/status.conf
     mode: 0644
 
-- name: Open HTTP port
+- name: open HTTP port
   ufw:
     rule: allow
     port: "80"
     proto: tcp
 
-- name: Open HTTPS port
+- name: open HTTPS port
   ufw:
     rule: allow
     port: "443"
     proto: tcp
 
-- name: Restart Nginx
+- name: restart Nginx
   service:
     name: nginx
     enabled: yes
