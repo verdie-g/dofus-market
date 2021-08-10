@@ -22,7 +22,7 @@ datadog_api_key: !vault |
 
 dofus_market_domain_name: dofus.market
 
-dofus_market_api_auth_user: dofus_market_bot
+dofus_market_api_auth_user: dofus-market-bot
 dofus_market_api_auth_password: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   36313437326430393264626131326538623963366132386637633361353763363732396661386532
