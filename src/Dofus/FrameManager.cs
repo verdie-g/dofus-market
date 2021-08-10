@@ -74,7 +74,8 @@ namespace Dofus
                 {
                     foreach (var frame in _registeredFrames)
                     {
-                        Debug.Assert(frame.Messages.Writer.TryWrite(message));
+                        bool written = frame.Messages.Writer.TryWrite(message);
+                        Debug.Assert(written);
                     }
                 }
             }
