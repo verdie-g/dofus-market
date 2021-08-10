@@ -4,7 +4,7 @@ using Dofus;
 using Dofus.Messages;
 using Microsoft.Extensions.Logging;
 
-namespace DofusMarket.Frames
+namespace DofusMarket.Bot.Frames
 {
     public class SocialFrame : Frame
     {

@@ -1,9 +1,9 @@
-using DofusMarket.Services;
+using DofusMarket.Bot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace DofusMarket
+namespace DofusMarket.Bot
 {
     public class Program
     {
@@ -20,7 +20,10 @@ namespace DofusMarket
 
                     services.AddHostedService<Worker>();
                     services.AddSingleton<CryptoService>();
-                    services.AddSingleton(new DofusMetrics(hostContext.Configuration["ConnectionStrings:DofusMarket"]));
+                    services.AddSingleton(new DofusMetrics(
+                        hostContext.Configuration["DofusMarket:Api:Host"],
+                        hostContext.Configuration["DofusMarket:Api:Username"],
+                        hostContext.Configuration["DofusMarket:Api:Password"]));
                 })
                 .Build().Run();
         }

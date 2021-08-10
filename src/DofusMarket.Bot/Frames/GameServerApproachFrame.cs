@@ -7,7 +7,7 @@ using Dofus.Internationalization;
 using Dofus.Messages;
 using Microsoft.Extensions.Logging;
 
-namespace DofusMarket.Frames
+namespace DofusMarket.Bot.Frames
 {
     internal class GameServerApproachFrame : Frame
     {

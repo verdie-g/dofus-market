@@ -1,4 +1,4 @@
-﻿namespace DofusMarket.Models
+﻿namespace DofusMarket.Bot.Models
 {
     internal class CharacterConfiguration
     {

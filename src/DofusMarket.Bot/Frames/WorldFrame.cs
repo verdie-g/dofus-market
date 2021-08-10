@@ -2,15 +2,14 @@
 using System.Threading.Tasks;
 using Dofus;
 using Dofus.Messages;
-using Dofus.Types;
 
-namespace DofusMarket.Frames
+namespace DofusMarket.Bot.Frames
 {
-    public class AllianceFrame : Frame
+    public class WorldFrame : Frame
     {
         public override async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            await SendMessageAsync(new PrismsListRegisterMessage { Listen = PrismListen.All });
+            await SendMessageAsync(new AnomalySubareaInformationRequestMessage());
         }
     }
 }

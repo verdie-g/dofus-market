@@ -11,18 +11,18 @@ using Dofus.Internationalization;
 using Dofus.Messages;
 using Dofus.Serialization;
 using Dofus.Types;
-using DofusMarket.Frames;
-using DofusMarket.Models;
-using DofusMarket.Services;
+using DofusMarket.Bot.Frames;
+using DofusMarket.Bot.Models;
+using DofusMarket.Bot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace DofusMarket
+namespace DofusMarket.Bot
 {
     internal class Worker : BackgroundService
     {
-        private static readonly DofusVersion DofusVersion = new() { Major = 2, Minor = 60, Code = 2, Build = 10, BuildType = BuildType.Release };
+        private static readonly DofusVersion DofusVersion = new() { Major = 2, Minor = 60, Code = 2, Build = 11, BuildType = BuildType.Release };
         private static readonly IPEndPoint DofusConnectionEndpoint = new(IPAddress.Parse("34.252.21.81"), 5555); // connection.host/port in config.xml
 
         private readonly CryptoService _cryptoService;
@@ -64,7 +64,7 @@ namespace DofusMarket
                         }
                     }
 
-                    var waitTime = TimeSpan.FromHours(6) - sw.Elapsed;
+                    var waitTime = TimeSpan.FromHours(3) - sw.Elapsed;
                     if (waitTime > TimeSpan.Zero)
                     {
                         _logger.LogInformation("Waiting {0} before next run", waitTime);

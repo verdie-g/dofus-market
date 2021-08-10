@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Dofus;
 using Dofus.Messages;
 
-namespace DofusMarket.Frames
+namespace DofusMarket.Bot.Frames
 {
     internal class LatencyFrame : Frame
     {

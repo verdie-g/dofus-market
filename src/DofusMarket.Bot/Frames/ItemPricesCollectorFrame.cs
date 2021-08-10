@@ -4,10 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dofus;
 using Dofus.Messages;
-using DofusMarket.Services;
+using DofusMarket.Bot.Models;
+using DofusMarket.Bot.Services;
 using Microsoft.Extensions.Logging;
 
-namespace DofusMarket.Frames
+namespace DofusMarket.Bot.Frames
 {
     internal class ItemPricesCollectorFrame : Frame
     {
@@ -88,8 +89,8 @@ namespace DofusMarket.Frames
                                     continue;
                                 }
 
-                                int stackSize = StackSizes[i];
-                                _metrics.WriteItemPrice(_serverId, (int)itemId, (int)itemTypeId, stackSize, price);
+                                _metrics.WriteItemPrice(new ItemPrice(_serverId, (int)itemId, (int)itemTypeId,
+                                    StackSizes[i], price));
                             }
                             await ReceiveMessageAsync<BasicNoOperationMessage>();
                             break;
