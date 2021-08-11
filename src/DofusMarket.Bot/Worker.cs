@@ -113,6 +113,7 @@ namespace DofusMarket.Bot
             // Send again a hardcoded flash key.
             await client.SendMessageAsync(new ClientKeyMessage { Key = "R7JdEA438imJUeyTlF#01" });
             await client.SendMessageAsync(new GameContextCreateRequestMessage());
+            await client.SendMessageAsync(new PlayerStatusUpdateRequestMessage { Status = PlayerStatus.Private });
 
             await itemPricesCollectorFrame.ProcessTask;
         }
