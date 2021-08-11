@@ -143,7 +143,9 @@ namespace DofusMarket.Bot
                         return null;
 
                     case IdentificationFailedForBadVersionMessage m:
-                        _logger.LogError("Identification failed for bad version. Required: {0}", m.RequiredVersion);
+                        _logger.LogError("Identification failed for bad version. Required: {0} (using {1})", m.RequiredVersion, DofusVersion);
+                        // Try incrementing the build number for the next server.
+                        DofusVersion.Build += 1;
                         return null;
 
                     case IdentificationSuccessMessage:
