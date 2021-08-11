@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class CharacterSelectionMessage : INetworkMessage
     {
-        internal static int MessageId => 7730;
+        internal static ushort MessageId => 7730;
 
         public ulong Id { get; init; }
 

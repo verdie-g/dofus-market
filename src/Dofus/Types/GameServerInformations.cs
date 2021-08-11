@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameServerInformations : INetworkMessage
     {
-        internal static int MessageId => 920;
+        internal static ushort MessageId => 920;
 
         public bool IsMonoAccount { get; private set; }
         public bool IsSelectable { get; private set; }

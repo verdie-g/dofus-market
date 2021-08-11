@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class BasicLatencyStatsMessage : INetworkMessage
     {
-        internal static int MessageId => 8738;
+        internal static ushort MessageId => 8738;
 
         public short Latency { get; set; }
         public short SampleCount { get; set; }

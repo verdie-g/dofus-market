@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class SelectedServerRefusedMessage : INetworkMessage
     {
-        internal static int MessageId => 506;
+        internal static ushort MessageId => 506;
 
         public ushort ServerId { get; private set; }
         public ServerConnectionError Error { get; private set; }

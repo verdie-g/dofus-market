@@ -202,7 +202,7 @@ namespace Dofus
                 return false;
             }
 
-            int messageId = GetMessageId(messageHeader);
+            ushort messageId = GetMessageId(messageHeader);
             if (!ReadMessageLength(ref sequenceReader, messageHeader, out int messageLength))
             {
                 rawMessage = default;
@@ -248,9 +248,9 @@ namespace Dofus
             Debug.Assert(written);
         }
 
-        private int GetMessageId(short messageHeader)
+        private ushort GetMessageId(short messageHeader)
         {
-            return ((ushort)messageHeader) >> HeaderLengthBitSize;
+            return (ushort)((ushort)messageHeader >> HeaderLengthBitSize);
         }
 
         private bool ReadMessageLength(ref SequenceReader<byte> sequenceReader, short messageHeader, out int length)

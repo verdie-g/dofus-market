@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class UpdateMapPlayersAgressableStatusMessage : INetworkMessage
     {
-        internal static int MessageId => 8171;
+        internal static ushort MessageId => 8171;
 
         public ulong[] PlayerIds { get; private set; } = Array.Empty<ulong>();
         public byte[] Enable { get; private set; } = Array.Empty<byte>();

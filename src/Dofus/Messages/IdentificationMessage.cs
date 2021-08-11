@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class IdentificationMessage : INetworkMessage
     {
-        internal static int MessageId => 2767;
+        internal static ushort MessageId => 2767;
 
         public bool AutoConnect { get; set; }
         public bool UseCertificate { get; set; }

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class EntityDispositionInformations : INetworkMessage
     {
-        internal static int MessageId => 2799;
+        internal static ushort MessageId => 2799;
 
         public short CellId { get; private set; }
         public byte Direction { get; private set; }

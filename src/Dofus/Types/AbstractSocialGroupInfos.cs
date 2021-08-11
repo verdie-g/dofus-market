@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class AbstractSocialGroupInfos : INetworkMessage
     {
-        internal static int MessageId => 6558;
+        internal static ushort MessageId => 6558;
 
         public void Serialize(DofusBinaryWriter writer)
         {

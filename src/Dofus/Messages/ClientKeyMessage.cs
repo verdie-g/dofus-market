@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class ClientKeyMessage : INetworkMessage
     {
-        internal static int MessageId => 982;
+        internal static ushort MessageId => 982;
         public string Key { get; init; } = string.Empty;
 
         public void Serialize(DofusBinaryWriter writer)

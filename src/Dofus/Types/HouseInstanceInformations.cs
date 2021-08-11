@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HouseInstanceInformations : INetworkMessage
     {
-        internal static int MessageId => 4670;
+        internal static ushort MessageId => 4670;
 
         public bool SecondHand { get; private set; }
         public bool IsLocked { get; private set; }

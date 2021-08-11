@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class BasicCharacterListMessage : INetworkMessage
     {
-        internal static int MessageId => 6379;
+        internal static ushort MessageId => 6379;
 
         public CharacterBaseInformations[] Characters { get; private set; } = Array.Empty<CharacterBaseInformations>();
 

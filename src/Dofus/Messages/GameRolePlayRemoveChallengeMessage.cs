@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class GameRolePlayRemoveChallengeMessage : INetworkMessage
     {
-        internal static int MessageId => 7713;
+        internal static ushort MessageId => 7713;
 
         public ushort FightId { get; private set; }
 

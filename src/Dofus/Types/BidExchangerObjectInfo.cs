@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class BidExchangerObjectInfo : INetworkMessage
     {
-        internal static int MessageId => 8892;
+        internal static ushort MessageId => 8892;
 
         public uint ObjectUid { get; private set; }
         public ushort ObjectGid { get; private set; }

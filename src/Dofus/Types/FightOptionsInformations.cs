@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class FightOptionsInformations : INetworkMessage
     {
-        internal static int MessageId => 4321;
+        internal static ushort MessageId => 4321;
 
         public bool IsSecret { get; private set; }
         public bool IsRestrictedToPartyOnly { get; private set; }

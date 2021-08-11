@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class IdentificationSuccessMessage : INetworkMessage
     {
-        internal static int MessageId => 7272;
+        internal static ushort MessageId => 7272;
         public bool HasRights { get; private set; }
         public bool HasConsoleRights { get; private set; }
         public bool WasAlreadyConnected { get; private set; }

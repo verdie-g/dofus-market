@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class GameRolePlayNpcQuestFlag : INetworkMessage
     {
-        internal static int MessageId => 8580;
+        internal static ushort MessageId => 8580;
 
         public ushort[] QuestToValidId { get; private set; } = Array.Empty<ushort>();
         public ushort[] QuestToStartId { get; private set; } = Array.Empty<ushort>();

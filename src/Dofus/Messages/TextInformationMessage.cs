@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class TextInformationMessage : INetworkMessage
     {
-        internal static int MessageId => 8845;
+        internal static ushort MessageId => 8845;
 
         public TextInformationType MsgType { get; private set; }
         public ushort MsgId { get; private set; }

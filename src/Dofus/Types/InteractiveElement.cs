@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class InteractiveElement : INetworkMessage
     {
-        internal static int MessageId => 8429;
+        internal static ushort MessageId => 8429;
 
         public int ElementId { get; private set; }
         public int ElementTypeId { get; private set; }

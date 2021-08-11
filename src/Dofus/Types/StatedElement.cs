@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class StatedElement : INetworkMessage
     {
-        internal static int MessageId => 8521;
+        internal static ushort MessageId => 8521;
 
         public int ElementId { get; private set; }
         public ushort ElementCellId { get; private set; }

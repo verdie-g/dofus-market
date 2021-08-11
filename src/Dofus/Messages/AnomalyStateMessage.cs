@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class AnomalyStateMessage : INetworkMessage
     {
-        internal static int MessageId => 1170;
+        internal static ushort MessageId => 1170;
 
         public ushort SubareaId { get; private set; }
         public bool Open { get; private set; }

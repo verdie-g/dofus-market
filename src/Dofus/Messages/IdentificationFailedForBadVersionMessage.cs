@@ -5,7 +5,8 @@ namespace Dofus.Messages
 {
     public class IdentificationFailedForBadVersionMessage : INetworkMessage
     {
-        internal static int MessageId => 8989;
+        internal static ushort MessageId => 8989;
+
         public DofusVersion RequiredVersion { get; private set; } = new();
 
         public void Serialize(DofusBinaryWriter writer)

@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class CharacterListRequestMessage : INetworkMessage
     {
-        internal static int MessageId => 4918;
+        internal static ushort MessageId => 4918;
 
         public void Serialize(DofusBinaryWriter writer)
         {

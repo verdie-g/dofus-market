@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class SpouseGetInformationsMessage : INetworkMessage
     {
-        internal static int MessageId => 2834;
+        internal static ushort MessageId => 2834;
 
         public void Serialize(DofusBinaryWriter writer)
         {

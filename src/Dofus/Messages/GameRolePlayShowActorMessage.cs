@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class GameRolePlayShowActorMessage : INetworkMessage
     {
-        internal static int MessageId => 2285;
+        internal static ushort MessageId => 2285;
 
         public GameRolePlayActorInformations Informations { get; set; } = new();
 

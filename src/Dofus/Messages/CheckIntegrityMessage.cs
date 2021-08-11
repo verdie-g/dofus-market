@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class CheckIntegrityMessage : INetworkMessage
     {
-        internal static int MessageId => 5541;
+        internal static ushort MessageId => 5541;
         public byte[] Data { get; init; } = Array.Empty<byte>();
 
         public void Serialize(DofusBinaryWriter writer)

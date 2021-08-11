@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class GameMapChangeOrientationMessage : INetworkMessage
     {
-        internal static int MessageId => 2457;
+        internal static ushort MessageId => 2457;
 
         public ActorOrientation Orientation { get; private set; } = new();
 

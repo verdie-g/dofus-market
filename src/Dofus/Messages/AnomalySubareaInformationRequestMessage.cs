@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class AnomalySubareaInformationRequestMessage : INetworkMessage
     {
-        internal static int MessageId => 2749;
+        internal static ushort MessageId => 2749;
 
         public void Serialize(DofusBinaryWriter writer)
         {

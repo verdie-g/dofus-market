@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class EntityLook : INetworkMessage
     {
-        internal static int MessageId => 9118;
+        internal static ushort MessageId => 9118;
 
         public ushort BonesId { get; private set; }
         public ushort[] Skins { get; private set; } = Array.Empty<ushort>();

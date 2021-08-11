@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class IdentificationFailedMessage : INetworkMessage
     {
-        internal static int MessageId => 5778;
+        internal static ushort MessageId => 5778;
         public IdentificationFailureReason Reason { get; private set; }
 
         public void Serialize(DofusBinaryWriter writer) => throw new NotImplementedException();

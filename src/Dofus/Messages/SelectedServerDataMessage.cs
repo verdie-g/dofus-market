@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class SelectedServerDataMessage : INetworkMessage
     {
-        internal static int MessageId => 1568;
+        internal static ushort MessageId => 1568;
 
         public short ServerId { get; private set; }
         public string Address { get; private set; } = string.Empty;

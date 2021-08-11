@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class ExchangeBidHouseGenericItemAddedMessage : INetworkMessage
     {
-        internal static int MessageId => 5133;
+        internal static ushort MessageId => 5133;
 
         public ushort ObjGenericId { get; private set; }
 

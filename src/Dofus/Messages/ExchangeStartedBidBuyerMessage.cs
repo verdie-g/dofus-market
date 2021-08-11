@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class ExchangeStartedBidBuyerMessage : INetworkMessage
     {
-        internal static int MessageId => 4958;
+        internal static ushort MessageId => 4958;
 
         public SellerBuyerDescriptor BuyerDescriptor { get; private set; } = new();
 

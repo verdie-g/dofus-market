@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class AcquaintancesGetListMessage : INetworkMessage
     {
-        internal static int MessageId => 1167;
+        internal static ushort MessageId => 1167;
 
         public void Serialize(DofusBinaryWriter writer)
         {

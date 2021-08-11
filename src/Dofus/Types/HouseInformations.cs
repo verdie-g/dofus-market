@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HouseInformations : INetworkMessage
     {
-        internal static int MessageId => 3662;
+        internal static ushort MessageId => 3662;
 
         public int HouseId { get; private set; }
         public ushort ModelId { get; private set; }

@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class GameContextRefreshEntityLookMessage : INetworkMessage
     {
-        internal static int MessageId => 6261;
+        internal static ushort MessageId => 6261;
 
         public long Id { get; private set; }
         public EntityLook Look { get; private set; } = new();

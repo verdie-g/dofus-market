@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class ServerListMessage : INetworkMessage
     {
-        internal static int MessageId => 4096;
+        internal static ushort MessageId => 4096;
 
         public GameServerInformations[] Servers { get; private set; } = Array.Empty<GameServerInformations>();
         public short AlreadyConnectedToServerId { get; private set; }

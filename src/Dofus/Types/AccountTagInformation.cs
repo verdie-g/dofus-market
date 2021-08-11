@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class AccountTagInformation : INetworkMessage
     {
-        internal static int MessageId => 4827;
+        internal static ushort MessageId => 4827;
         public string Nickname { get; private set; } = string.Empty;
         public string TagNumber { get; private set; } = string.Empty;
 

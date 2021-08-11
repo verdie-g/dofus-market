@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class MapObstacle : INetworkMessage
     {
-        internal static int MessageId => 7167;
+        internal static ushort MessageId => 7167;
 
         public ushort ObstacleCellId { get; private set; }
         public MapObstacleState State { get; private set; }

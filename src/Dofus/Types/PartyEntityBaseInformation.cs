@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class PartyEntityBaseInformation : INetworkMessage
     {
-        internal static int MessageId => 8446;
+        internal static ushort MessageId => 8446;
 
         public byte IndexId { get; private set; }
         public byte EntityModelId { get; private set; }

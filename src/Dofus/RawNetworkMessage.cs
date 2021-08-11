@@ -2,10 +2,10 @@
 {
     internal readonly struct RawNetworkMessage
     {
-        public readonly int Id;
+        public readonly ushort Id;
         public readonly byte[] Content;
 
-        public RawNetworkMessage(int id, byte[] content)
+        public RawNetworkMessage(ushort id, byte[] content)
         {
             Id = id;
             Content = content;

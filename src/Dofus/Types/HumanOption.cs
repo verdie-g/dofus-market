@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HumanOption : INetworkMessage
     {
-        internal static int MessageId => 3247;
+        internal static ushort MessageId => 3247;
 
         public void Serialize(DofusBinaryWriter writer)
         {

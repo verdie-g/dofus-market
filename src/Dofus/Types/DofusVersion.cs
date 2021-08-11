@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class DofusVersion : INetworkMessage
     {
-        internal static int MessageId => 4016;
+        internal static ushort MessageId => 4016;
 
         public byte Major { get; set; }
         public byte Minor { get; set; }

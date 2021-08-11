@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class QueueStatusMessage : INetworkMessage
     {
-        internal static int MessageId => 8974;
+        internal static ushort MessageId => 8974;
 
         public ushort Position { get; private set; }
         public ushort Total { get; private set; }

@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class ChannelEnablingMessage : INetworkMessage
     {
-        internal static int MessageId => 5493;
+        internal static ushort MessageId => 5493;
 
         public byte Channel { get; init; }
         public bool Enable { get; init; }

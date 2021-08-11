@@ -3,15 +3,16 @@ using Dofus.Types;
 
 namespace Dofus.Messages
 {
-    public class PrismsListRegisterMessage : INetworkMessage
+    public class PlayerStatusUpdateRequestMessage : INetworkMessage
     {
-        internal static ushort MessageId => 4752;
+        internal static ushort MessageId => 9100;
 
-        public PrismListen Listen { get; init; }
+        public PlayerStatus Status { get; set; } = new();
 
         public void Serialize(DofusBinaryWriter writer)
         {
-            writer.Write((byte)Listen);
+            writer.Write(NetworkMessageRegistry.GetIdFromType(Status.GetType()));
+            Status.Serialize(writer);
         }
 
         public void Deserialize(DofusBinaryReader reader)

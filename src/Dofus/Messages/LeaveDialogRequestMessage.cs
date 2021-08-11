@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class LeaveDialogRequestMessage : INetworkMessage
     {
-        internal static int MessageId => 8404;
+        internal static ushort MessageId => 8404;
 
         public void Serialize(DofusBinaryWriter writer)
         {

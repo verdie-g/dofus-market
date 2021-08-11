@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class GameContextRemoveElementMessage : INetworkMessage
     {
-        internal static int MessageId => 6263;
+        internal static ushort MessageId => 6263;
 
         public long Id { get; private set; }
 

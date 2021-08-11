@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class ExchangeBidHouseSearchMessage : INetworkMessage
     {
-        internal static int MessageId => 4493;
+        internal static ushort MessageId => 4493;
 
         public short GenId { get; init; }
         public bool Follow { get; init; }

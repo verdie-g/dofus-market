@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class InteractiveUsedMessage : INetworkMessage
     {
-        internal static int MessageId => 9664;
+        internal static ushort MessageId => 9664;
 
         public ulong EntityId { get; private set; }
         public uint ElemId { get; private set; }

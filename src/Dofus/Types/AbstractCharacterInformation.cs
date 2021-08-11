@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class AbstractCharacterInformation : INetworkMessage
     {
-        internal static int MessageId => 8427;
+        internal static ushort MessageId => 8427;
 
         public ulong Id { get; private set; }
 

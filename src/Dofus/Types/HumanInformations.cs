@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class HumanInformations : INetworkMessage
     {
-        internal static int MessageId => 4572;
+        internal static ushort MessageId => 4572;
 
         public ActorRestrictionsInformations Restrictions { get; private set; } = new();
         public bool Sex { get; private set; }

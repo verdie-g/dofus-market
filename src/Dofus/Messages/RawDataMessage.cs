@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class RawDataMessage : INetworkMessage
     {
-        internal static int MessageId => 124;
+        internal static ushort MessageId => 124;
 
         public byte[] Content { get; private set; } = Array.Empty<byte>();
 

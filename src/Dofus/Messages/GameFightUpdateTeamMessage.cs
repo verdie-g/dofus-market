@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class GameFightUpdateTeamMessage : INetworkMessage
     {
-        internal static int MessageId => 6859;
+        internal static ushort MessageId => 6859;
 
         public ushort FightId { get; private set; }
         public FightTeamInformations Team { get; private set; } = new();

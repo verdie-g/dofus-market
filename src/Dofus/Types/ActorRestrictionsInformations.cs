@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ActorRestrictionsInformations : INetworkMessage
     {
-        internal static int MessageId => 1254;
+        internal static ushort MessageId => 1254;
 
         public bool CantBeAggressed { get; private set; }
         public bool CantBeChallenged { get; private set; }

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class PrismInformation : INetworkMessage
     {
-        internal static int MessageId => 1753;
+        internal static ushort MessageId => 1753;
 
         public byte TypeId { get; private set; }
         public byte State { get; private set; }

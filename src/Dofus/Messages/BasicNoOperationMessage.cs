@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class BasicNoOperationMessage : INetworkMessage
     {
-        internal static int MessageId => 7386;
+        internal static ushort MessageId => 7386;
 
         public void Serialize(DofusBinaryWriter writer)
         {

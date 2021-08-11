@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class SellerBuyerDescriptor : INetworkMessage
     {
-        internal static int MessageId => 5463;
+        internal static ushort MessageId => 5463;
 
         public uint[] Quantities { get; private set; } = Array.Empty<uint>();
         public uint[] Types { get; private set; } = Array.Empty<uint>();

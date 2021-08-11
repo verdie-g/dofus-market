@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class CharacterSelectedSuccessMessage : INetworkMessage
     {
-        internal static int MessageId => 7662;
+        internal static ushort MessageId => 7662;
 
         public CharacterBaseInformations Infos { get; private set; } = new();
         public bool IsCollectionStats { get; private set; }

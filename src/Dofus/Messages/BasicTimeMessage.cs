@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class BasicTimeMessage : INetworkMessage
     {
-        internal static int MessageId => 4907;
+        internal static ushort MessageId => 4907;
 
         public double TimeStamp { get; private set; }
         public short TimeZoneOffset { get; private set; }

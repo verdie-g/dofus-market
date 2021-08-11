@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class Item : INetworkMessage
     {
-        internal static int MessageId => 4071;
+        internal static ushort MessageId => 4071;
 
         public void Serialize(DofusBinaryWriter writer)
         {

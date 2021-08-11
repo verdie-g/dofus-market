@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class AuthenticationTicketMessage : INetworkMessage
     {
-        internal static int MessageId => 3920;
+        internal static ushort MessageId => 3920;
 
         public string Lang { get; init; } = string.Empty;
         public string Ticket { get; init; } = string.Empty;

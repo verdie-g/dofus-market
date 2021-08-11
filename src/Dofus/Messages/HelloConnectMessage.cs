@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class HelloConnectMessage : INetworkMessage
     {
-        internal static int MessageId => 1030;
+        internal static ushort MessageId => 1030;
         public string Salt { get; private set; } = string.Empty;
         public byte[] Key { get; private set; } = Array.Empty<byte>();
 

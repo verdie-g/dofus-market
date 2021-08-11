@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class MapInformationsRequestMessage : INetworkMessage
     {
-        internal static int MessageId => 4598;
+        internal static ushort MessageId => 4598;
         public long MapId { get; init; }
 
         public void Serialize(DofusBinaryWriter writer)

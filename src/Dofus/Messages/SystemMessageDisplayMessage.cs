@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class SystemMessageDisplayMessage : INetworkMessage
     {
-        internal static int MessageId => 1803;
+        internal static ushort MessageId => 1803;
 
         public bool HangUp { get; private set; }
         public ushort MsgId { get; private set; }

@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class FightCommonInformations : INetworkMessage
     {
-        internal static int MessageId => 75;
+        internal static ushort MessageId => 75;
 
         public ushort FightId { get; private set; }
         public FightType FightType { get; private set; }

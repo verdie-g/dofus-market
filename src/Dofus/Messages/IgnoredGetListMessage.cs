@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class IgnoredGetListMessage : INetworkMessage
     {
-        internal static int MessageId => 2713;
+        internal static ushort MessageId => 2713;
 
         public void Serialize(DofusBinaryWriter writer)
         {

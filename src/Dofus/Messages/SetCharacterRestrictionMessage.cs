@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class SetCharacterRestrictionMessage : INetworkMessage
     {
-        internal static int MessageId => 4678;
+        internal static ushort MessageId => 4678;
 
         public long ActorId { get; set; }
         public ActorRestrictionsInformations Restrictions { get; private set; } = new();

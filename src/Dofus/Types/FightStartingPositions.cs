@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class FightStartingPositions : INetworkMessage
     {
-        internal static int MessageId => 2393;
+        internal static ushort MessageId => 2393;
 
         public ushort[] PositionsForChallengers { get; private set; } = Array.Empty<ushort>();
         public ushort[] PositionsForDefenders { get; private set; } = Array.Empty<ushort>();

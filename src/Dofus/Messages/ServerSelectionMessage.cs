@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class ServerSelectionMessage : INetworkMessage
     {
-        internal static int MessageId => 6327;
+        internal static ushort MessageId => 6327;
 
         public short ServerId { get; init; }
 

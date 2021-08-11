@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class MapFightStartPositionsUpdateMessage : INetworkMessage
     {
-        internal static int MessageId => 7470;
+        internal static ushort MessageId => 7470;
 
         public long MapId { get; private set; }
         public FightStartingPositions FightStartPositions { get; private set; } = new();

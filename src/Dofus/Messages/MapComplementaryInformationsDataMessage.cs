@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class MapComplementaryInformationsDataMessage : INetworkMessage
     {
-        internal static int MessageId => 7028;
+        internal static ushort MessageId => 7028;
 
         public ushort SubAreaId { get; private set; }
         public long MapId { get; private set; }

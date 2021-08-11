@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class GameMapMovementMessage : INetworkMessage
     {
-        internal static int MessageId => 4500;
+        internal static ushort MessageId => 4500;
 
         public short[] KeyMovements { get; private set; } = Array.Empty<short>();
         public short ForcedDirection { get; private set; }

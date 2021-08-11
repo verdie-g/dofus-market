@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class SubEntity : INetworkMessage
     {
-        internal static int MessageId => 3806;
+        internal static ushort MessageId => 3806;
 
         public byte BindingPointCategory { get; private set; }
         public byte BindingPointIndex { get; private set; }

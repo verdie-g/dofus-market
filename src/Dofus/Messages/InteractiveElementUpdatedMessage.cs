@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class InteractiveElementUpdatedMessage : INetworkMessage
     {
-        internal static int MessageId => 9844;
+        internal static ushort MessageId => 9844;
 
         public InteractiveElement InteractiveElement { get; private set; } = new();
 

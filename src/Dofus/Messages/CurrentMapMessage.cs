@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class CurrentMapMessage : INetworkMessage
     {
-        internal static int MessageId => 3437;
+        internal static ushort MessageId => 3437;
 
         public long MapId { get; private set; }
         public string MapKey { get; private set; } = string.Empty;

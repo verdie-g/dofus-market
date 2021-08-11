@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class AbstractFightTeamInformations : INetworkMessage
     {
-        internal static int MessageId => 2033;
+        internal static ushort MessageId => 2033;
 
         public byte TeamId { get; private set; }
         public long LeaderId { get; private set; }

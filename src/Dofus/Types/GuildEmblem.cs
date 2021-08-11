@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GuildEmblem : INetworkMessage
     {
-        internal static int MessageId => 150;
+        internal static ushort MessageId => 150;
 
         public ushort SymbolShape { get; private set; }
         public int SymbolColor { get; private set; }

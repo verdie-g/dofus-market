@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class SequenceNumberMessage : INetworkMessage
     {
-        internal static int MessageId => 513;
+        internal static ushort MessageId => 513;
 
         public ushort Number { get; init; }
 

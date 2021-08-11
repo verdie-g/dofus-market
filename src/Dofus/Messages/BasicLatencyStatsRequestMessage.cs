@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class BasicLatencyStatsRequestMessage : INetworkMessage
     {
-        internal static int MessageId => 7797;
+        internal static ushort MessageId => 7797;
 
         public void Serialize(DofusBinaryWriter writer)
         {

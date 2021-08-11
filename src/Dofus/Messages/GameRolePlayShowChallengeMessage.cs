@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class GameRolePlayShowChallengeMessage : INetworkMessage
     {
-        internal static int MessageId => 913;
+        internal static ushort MessageId => 913;
 
         public FightCommonInformations CommonInfos { get; private set; } = new();
 

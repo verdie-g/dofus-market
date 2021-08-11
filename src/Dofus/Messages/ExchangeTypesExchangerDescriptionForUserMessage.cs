@@ -5,7 +5,7 @@ namespace Dofus.Messages
 {
     public class ExchangeTypesExchangerDescriptionForUserMessage : INetworkMessage
     {
-        internal static int MessageId => 1423;
+        internal static ushort MessageId => 1423;
 
         public uint ObjectType { get; private set; }
         public uint[] TypeDescription { get; private set; } = Array.Empty<uint>();

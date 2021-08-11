@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class MapFightCountMessage : INetworkMessage
     {
-        internal static int MessageId => 1367;
+        internal static ushort MessageId => 1367;
 
         public ushort FightCount { get; set; }
 

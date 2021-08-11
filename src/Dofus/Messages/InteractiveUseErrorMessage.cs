@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class InteractiveUseErrorMessage : INetworkMessage
     {
-        internal static int MessageId => 5333;
+        internal static ushort MessageId => 5333;
 
         public uint ElemId { get; private set; }
         public uint SkillInstanceUid { get; private set; }

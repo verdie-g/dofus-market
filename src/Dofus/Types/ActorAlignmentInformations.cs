@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ActorAlignmentInformations : INetworkMessage
     {
-        internal static int MessageId => 927;
+        internal static ushort MessageId => 927;
 
         public byte AlignmentSide { get; private set; }
         public byte AlignmentValue { get; private set; }
