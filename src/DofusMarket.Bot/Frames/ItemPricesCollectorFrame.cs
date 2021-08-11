@@ -16,6 +16,7 @@ namespace DofusMarket.Bot.Frames
 
         private readonly int _serverId;
         private readonly DofusMetrics _metrics;
+        private readonly Random _rng = new();
 
         public ItemPricesCollectorFrame(int serverId, DofusMetrics metrics)
         {
@@ -35,6 +36,7 @@ namespace DofusMarket.Bot.Frames
                 return;
             }
 
+            await SendPromotionMessageAsync();
             await SendMessageAsync(new MapInformationsRequestMessage { MapId = currentMap.MapId });
 
             var mapData = await ReceiveMessageAsync<MapComplementaryInformationsDataMessage>();
@@ -113,6 +115,16 @@ namespace DofusMarket.Bot.Frames
             }
 
             await SendMessageAsync(new LeaveDialogRequestMessage());
+            await SendPromotionMessageAsync();
+        }
+
+        private Task SendPromotionMessageAsync()
+        {
+            return SendMessageAsync(new ChatClientMultiMessage
+            {
+                Content = $"Retrouvez la tendance des prix de toutes les ressources Dofus sur [dofus.market] {_rng.Next(10_000)}",
+                Channel = 0,
+            });
         }
     }
 }
