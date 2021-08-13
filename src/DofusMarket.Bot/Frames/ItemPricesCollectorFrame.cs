@@ -12,6 +12,11 @@ namespace DofusMarket.Bot.Frames
 {
     internal class ItemPricesCollectorFrame : Frame
     {
+        private static readonly (long mapId, uint npcId)[] AuctionHouses =
+        {
+            (191104004, 515220), // Astrub.
+            (146741, 515264), // Bonta.
+        };
         private static readonly int[] StackSizes = { 1, 10, 100 };
 
         private readonly int _serverId;
@@ -25,23 +30,21 @@ namespace DofusMarket.Bot.Frames
 
         public override async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            const long bontaMapId = 146741;
-            const uint bontaNpcId = 515264;
-
             var currentMap = await ReceiveMessageAsync<CurrentMapMessage>();
-            if (currentMap.MapId != bontaMapId)
+            var auctionHouse = AuctionHouses.FirstOrDefault(h => h.mapId == currentMap.MapId);
+            if (auctionHouse == default)
             {
-                Logger.LogError("Not on Bonta map");
+                Logger.LogError("Character is not at a known auction house");
                 return;
             }
 
             await SendMessageAsync(new MapInformationsRequestMessage { MapId = currentMap.MapId });
 
             var mapData = await ReceiveMessageAsync<MapComplementaryInformationsDataMessage>();
-            uint skillInstanceUid = mapData.InteractiveElements.First(e => e.ElementId == bontaNpcId).EnabledSkills[0].SkillInstanceUid;
+            uint skillInstanceUid = mapData.InteractiveElements.First(e => e.ElementId == auctionHouse.npcId).EnabledSkills[0].SkillInstanceUid;
             await SendMessageAsync(new InteractiveUseRequestMessage
             {
-                ElemId = bontaNpcId,
+                ElemId = auctionHouse.npcId,
                 SkillInstanceUid = skillInstanceUid,
             });
 
