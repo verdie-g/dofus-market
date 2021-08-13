@@ -31,6 +31,7 @@ namespace DofusMarket.Bot
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+        private readonly Random _rng = new();
 
         public Worker(CryptoService cryptoService, DofusMetrics dofusMetrics, IHostApplicationLifetime appLifetime,
             ILoggerFactory loggerFactory, IConfiguration configuration)
@@ -116,6 +117,11 @@ namespace DofusMarket.Bot
             await client.SendMessageAsync(new PlayerStatusUpdateRequestMessage { Status = PlayerStatus.Private });
 
             await itemPricesCollectorFrame.ProcessTask;
+            await client.SendMessageAsync(new ChatClientMultiMessage
+            {
+                Content = $"Retrouvez la tendance des prix de toutes les ressources Dofus sur [dofus.market] {_rng.Next(10_000)}",
+                Channel = 0,
+            });
         }
 
         private async Task<AuthenticationResult?> AuthenticateAsync(EndPoint connectionEndpoint,
