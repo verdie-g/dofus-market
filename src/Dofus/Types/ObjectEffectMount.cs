@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectMount : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 5871;
+        internal new static ushort MessageId => 5871;
 
         public bool Sex { get; private set; }
         public bool IsRideable { get; private set; }

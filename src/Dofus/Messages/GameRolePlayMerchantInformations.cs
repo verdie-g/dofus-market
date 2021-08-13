@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class GameRolePlayMerchantInformations : GameRolePlayNamedActorInformations, INetworkMessage
     {
-        internal new static int MessageId => 2992;
+        internal new static ushort MessageId => 2992;
 
         public byte SellType { get; set; }
         public HumanOption[] Options { get; private set; } = Array.Empty<HumanOption>();

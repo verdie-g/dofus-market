@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class AllianceInformations : BasicNamedAllianceInformations, INetworkMessage
     {
-        internal new static int MessageId => 1398;
+        internal new static ushort MessageId => 1398;
 
         public GuildEmblem AllianceEmblem { get; private set; } = new();
 

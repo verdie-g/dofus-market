@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HumanOptionTitle : HumanOption, INetworkMessage
     {
-        internal new static int MessageId => 5299;
+        internal new static ushort MessageId => 5299;
 
         public ushort TitleId { get; private set; }
         public string TitleParam { get; private set; } = string.Empty;

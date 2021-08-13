@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectLadder : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 2694;
+        internal new static ushort MessageId => 2694;
 
         public uint MonsterCount { get; set; }
 

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class CharacterMinimalInformations : CharacterBasicMinimalInformations, INetworkMessage
     {
-        internal new static int MessageId => 2126;
+        internal new static ushort MessageId => 2126;
 
         public ushort Level { get; private set; }
 

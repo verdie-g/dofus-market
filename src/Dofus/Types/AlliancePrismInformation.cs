@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class AlliancePrismInformation : PrismInformation, INetworkMessage
     {
-        internal new static int MessageId => 4043;
+        internal new static ushort MessageId => 4043;
 
         public AllianceInformations Alliance { get; private set; } = new();
 

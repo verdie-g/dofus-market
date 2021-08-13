@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class PartyInvitationMemberInformations : CharacterBaseInformations, INetworkMessage
     {
-        internal new static int MessageId => 6670;
+        internal new static ushort MessageId => 6670;
 
         public short WorldX { get; private set; }
         public short WorldY { get; private set; }

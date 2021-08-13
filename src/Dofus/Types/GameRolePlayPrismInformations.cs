@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameRolePlayPrismInformations : GameRolePlayActorInformations, INetworkMessage
     {
-        internal new static int MessageId => 7793;
+        internal new static ushort MessageId => 7793;
 
         public PrismInformation Prism { get; private set; } = new();
 

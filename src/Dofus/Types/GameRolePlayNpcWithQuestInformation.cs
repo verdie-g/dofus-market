@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameRolePlayNpcWithQuestInformation : GameRolePlayNpcInformations, INetworkMessage
     {
-        internal new static int MessageId => 7842;
+        internal new static ushort MessageId => 7842;
 
         public GameRolePlayNpcQuestFlag QuestFlag { get; private set; } = new();
 

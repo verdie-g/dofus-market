@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectCreature : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 222;
+        internal new static ushort MessageId => 222;
 
         public uint MonsterFamilyId { get; private set; }
 

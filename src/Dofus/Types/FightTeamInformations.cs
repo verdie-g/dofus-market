@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class FightTeamInformations : AbstractFightTeamInformations, INetworkMessage
     {
-        internal new static int MessageId => 4316;
+        internal new static ushort MessageId => 4316;
 
         public FightTeamMemberInformations[] TeamMembers { get; private set; } = Array.Empty<FightTeamMemberInformations>();
 

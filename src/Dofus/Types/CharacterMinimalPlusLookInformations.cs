@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class CharacterMinimalPlusLookInformations : CharacterMinimalInformations, INetworkMessage
     {
-        internal new static int MessageId => 1956;
+        internal new static ushort MessageId => 1956;
 
         public EntityLook EntityLook { get; private set; } = new();
         public Breed Breed { get; private set; }

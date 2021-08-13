@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class HouseOnMapInformations : HouseInformations, INetworkMessage
     {
-        internal new static int MessageId => 2155;
+        internal new static ushort MessageId => 2155;
 
         public int[] DoorsOnMap { get; private set; } = Array.Empty<int>();
         public HouseInstanceInformations[] HouseInstances { get; private set; } = Array.Empty<HouseInstanceInformations>();

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectDice : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 7506;
+        internal new static ushort MessageId => 7506;
 
         public uint DiceNum { get; private set; }
         public uint DiceSide { get; private set; }

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HumanOptionSkillUse : HumanOption, INetworkMessage
     {
-        internal new static int MessageId => 1691;
+        internal new static ushort MessageId => 1691;
 
         public uint ElementId { get; private set; }
         public ushort SkillId { get; private set; }

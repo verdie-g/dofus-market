@@ -6,7 +6,7 @@ namespace Dofus.Messages
 {
     public class ChatServerWithObjectMessage : ChatServerMessage, INetworkMessage
     {
-        internal new static int MessageId => 5393;
+        internal new static ushort MessageId => 5393;
 
         public ObjectItem[] Objects { get; private set; } = Array.Empty<ObjectItem>();
 

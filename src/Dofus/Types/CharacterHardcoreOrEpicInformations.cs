@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class CharacterHardcoreOrEpicInformations : CharacterBaseInformations, INetworkMessage
     {
-        internal new static int MessageId => 9632;
+        internal new static ushort MessageId => 9632;
 
         public byte DeathState { get; private set; }
         public ushort DeathCount { get; private set; }

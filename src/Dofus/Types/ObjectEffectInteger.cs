@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectInteger : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 624;
+        internal new static ushort MessageId => 624;
 
         public uint Value { get; private set; }
 

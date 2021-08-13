@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HumanOptionGuild : HumanOption, INetworkMessage
     {
-        internal new static int MessageId => 7748;
+        internal new static ushort MessageId => 7748;
 
         public GuildInformations GuildInformations { get; private set; } = new();
 

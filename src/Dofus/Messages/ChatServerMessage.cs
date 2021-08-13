@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class ChatServerMessage : ChatAbstractServerMessage, INetworkMessage
     {
-        internal new static int MessageId => 5855;
+        internal new static ushort MessageId => 5855;
 
         public long SenderId { get; private set; }
         public string SenderName { get; private set; } = string.Empty;

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HumanOptionAlliance : HumanOption, INetworkMessage
     {
-        internal new static int MessageId => 1332;
+        internal new static ushort MessageId => 1332;
 
         public AllianceInformations AllianceInformations { get; private set; } = new();
         public byte Aggressable { get; private set; }

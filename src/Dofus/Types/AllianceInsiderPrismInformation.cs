@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class AllianceInsiderPrismInformation : PrismInformation, INetworkMessage
     {
-        internal new static int MessageId => 9390;
+        internal new static ushort MessageId => 9390;
 
         public int LastTimeSlotModificationDate { get; private set; }
         public uint LastTimeSlotModificationAuthorGuildId { get; private set; }

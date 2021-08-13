@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameContextActorInformations : GameContextActorPositionInformations, INetworkMessage
     {
-        internal new static int MessageId => 3338;
+        internal new static ushort MessageId => 3338;
 
         public EntityLook Look { get; private set; } = new();
 

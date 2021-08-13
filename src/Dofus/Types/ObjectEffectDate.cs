@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectDate : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 6498;
+        internal new static ushort MessageId => 6498;
 
         public uint Year { get; private set; }
         public byte Month { get; private set; }

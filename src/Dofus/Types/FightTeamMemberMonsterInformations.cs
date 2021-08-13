@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class FightTeamMemberMonsterInformations : FightTeamMemberInformations, INetworkMessage
     {
-        internal new static int MessageId => 8655;
+        internal new static ushort MessageId => 8655;
 
         public int MonsterId { get; private set; }
         public byte Grade { get; private set; }

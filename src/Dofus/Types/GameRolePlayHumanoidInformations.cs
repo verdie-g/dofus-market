@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameRolePlayHumanoidInformations : GameRolePlayNamedActorInformations, INetworkMessage
     {
-        internal new static int MessageId => 4263;
+        internal new static ushort MessageId => 4263;
 
         public HumanInformations HumanoidInfo { get; private set; } = new();
         public int AccountId { get; private set; }

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectDuration : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 1342;
+        internal new static ushort MessageId => 1342;
 
         public ushort Days { get; private set; }
         public byte Hours { get; private set; }

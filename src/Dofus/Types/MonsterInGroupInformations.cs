@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class MonsterInGroupInformations : MonsterInGroupLightInformations, INetworkMessage
     {
-        internal new static int MessageId => 3872;
+        internal new static ushort MessageId => 3872;
 
         public EntityLook Look { get; private set; } = new();
 

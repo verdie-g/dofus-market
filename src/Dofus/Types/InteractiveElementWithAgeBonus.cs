@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class InteractiveElementWithAgeBonus : InteractiveElement, INetworkMessage
     {
-        internal new static int MessageId => 7651;
+        internal new static ushort MessageId => 7651;
 
         public short AgeBonus { get; private set; }
 

@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class ObjectItem : Item, INetworkMessage
     {
-        internal new static int MessageId => 224;
+        internal new static ushort MessageId => 224;
 
         public short Position { get; private set; }
         public ushort ObjectGid { get; private set; }

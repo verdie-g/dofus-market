@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class GroupMonsterStaticInformationsWithAlternatives : GroupMonsterStaticInformations, INetworkMessage
     {
-        internal new static int MessageId => 822;
+        internal new static ushort MessageId => 822;
 
         public AlternativeMonsterInGroupLightInformations[] Alternatives { get; private set; } = Array.Empty<AlternativeMonsterInGroupLightInformations>();
 

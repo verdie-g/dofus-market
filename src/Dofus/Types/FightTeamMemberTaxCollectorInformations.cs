@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class FightTeamMemberTaxCollectorInformations : FightTeamMemberInformations, INetworkMessage
     {
-        internal new static int MessageId => 9221;
+        internal new static ushort MessageId => 9221;
 
         public ushort FirstNameId { get; private set; }
         public ushort LastNameId { get; private set; }

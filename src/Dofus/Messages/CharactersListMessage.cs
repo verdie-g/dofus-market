@@ -4,7 +4,7 @@ namespace Dofus.Messages
 {
     public class CharactersListMessage : BasicCharacterListMessage, INetworkMessage
     {
-        internal new static int MessageId => 7692;
+        internal new static ushort MessageId => 7692;
 
         public bool HasStartupActions { get; private set; }
 

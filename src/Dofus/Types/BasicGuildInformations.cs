@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class BasicGuildInformations : AbstractSocialGroupInfos, INetworkMessage
     {
-        internal new static int MessageId => 5973;
+        internal new static ushort MessageId => 5973;
 
         public uint GuildId { get; private set; }
         public string GuildName { get; private set; } = string.Empty;

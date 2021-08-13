@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameRolePlayNpcInformations : GameRolePlayActorInformations, INetworkMessage
     {
-        internal new static int MessageId => 5203;
+        internal new static ushort MessageId => 5203;
 
         public ushort NpcId { get; private set; }
         public bool Sex { get; private set; }

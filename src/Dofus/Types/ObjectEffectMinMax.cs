@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class ObjectEffectMinMax : ObjectEffect, INetworkMessage
     {
-        internal new static int MessageId => 6930;
+        internal new static ushort MessageId => 6930;
 
         public uint Min { get; private set; }
         public uint Max { get; private set; }

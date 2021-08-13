@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HumanOptionOrnament : HumanOption, INetworkMessage
     {
-        internal new static int MessageId => 6314;
+        internal new static ushort MessageId => 6314;
 
         public ushort OrnamentId { get; private set; }
         public ushort LevelId { get; private set; }

@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class CharacterBaseInformations : CharacterMinimalPlusLookInformations, INetworkMessage
     {
-        internal new static int MessageId => 7196;
+        internal new static ushort MessageId => 7196;
 
         public bool Sex { get; private set; }
 

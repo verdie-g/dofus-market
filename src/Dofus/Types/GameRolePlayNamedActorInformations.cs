@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameRolePlayNamedActorInformations : GameRolePlayActorInformations, INetworkMessage
     {
-        internal new static int MessageId => 4623;
+        internal new static ushort MessageId => 4623;
 
         public string Name { get; private set; } = string.Empty;
 

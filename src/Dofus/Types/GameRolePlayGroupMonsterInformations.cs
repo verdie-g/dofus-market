@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class GameRolePlayGroupMonsterInformations : GameRolePlayActorInformations, INetworkMessage
     {
-        internal new static int MessageId => 475;
+        internal new static ushort MessageId => 475;
 
         public bool KeyRingBonus { get; private set; }
         public bool HasHardcoreDrop { get; private set; }

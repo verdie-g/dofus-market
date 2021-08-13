@@ -6,7 +6,7 @@ namespace Dofus.Types
 {
     public class HumanOptionFollower : HumanOption, INetworkMessage
     {
-        internal new static int MessageId => 2314;
+        internal new static ushort MessageId => 2314;
 
         public IndexedEntityLook[] FollowingCharactersLook { get; private set; } = Array.Empty<IndexedEntityLook>();
 

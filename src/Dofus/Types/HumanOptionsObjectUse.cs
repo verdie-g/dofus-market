@@ -5,7 +5,7 @@ namespace Dofus.Types
 {
     public class HumanOptionsObjectUse : HumanOption, INetworkMessage
     {
-        internal new static int MessageId => 8293;
+        internal new static ushort MessageId => 8293;
 
         public byte DelayTypeId { get; private set; }
         public double DelayEndTime { get; private set; }
