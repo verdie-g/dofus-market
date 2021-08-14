@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS item_prices (
 );
 
 SELECT create_hypertable('item_prices', 'time', if_not_exists => TRUE);
+CREATE INDEX IF NOT EXISTS item_prices_server_item_stack_idx ON item_prices(server_id, item_id, stack_size);
 ");
         }
 
