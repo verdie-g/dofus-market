@@ -16,6 +16,11 @@ server {
 
     include /etc/nginx/snippets/dofus-market-ssl.conf;
 
+    # Remove trailing dot.
+    if ($http_host ~ "\.$"){
+        rewrite ^(.*) $scheme://$host$1 permanent;
+    }
+
     location / {
         proxy_pass http://localhost:3000/;
     }
