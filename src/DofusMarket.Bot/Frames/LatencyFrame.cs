@@ -11,7 +11,7 @@ namespace DofusMarket.Bot.Frames
         public override async Task ProcessAsync(CancellationToken cancellationToken)
         {
             short sampleCount = 0;
-            while (true)
+            while (cancellationToken.IsCancellationRequested)
             {
                 var message = await ReceiveMessageAsync<INetworkMessage>();
                 sampleCount = (short)Math.Min(sampleCount + 1, 50);

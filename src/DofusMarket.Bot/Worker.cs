@@ -98,6 +98,7 @@ namespace DofusMarket.Bot
             FrameManager frameManager = new(client, _loggerFactory);
             frameManager.Register(new SynchronizationFrame());
             frameManager.Register(new LatencyFrame());
+            frameManager.Register(new MiscFrame());
 
             var gameServerApproachFrame = frameManager.Register(
                 new GameServerApproachFrame(authenticationResult.Ticket, characterConfiguration.CharacterName));
