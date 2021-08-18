@@ -27,12 +27,16 @@ namespace Dofus.DataExporter
             return RunQueryAsync(connString, @"
 CREATE TABLE IF NOT EXISTS servers (
     id      INT  NOT NULL PRIMARY KEY,
-    name_fr TEXT NOT NULL
+    name_en TEXT NOT NULL,
+    name_fr TEXT NOT NULL,
+    name_es TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS items (
     id      INT  NOT NULL PRIMARY KEY,
-    name_fr TEXT NOT NULL
+    name_en TEXT NOT NULL,
+    name_fr TEXT NOT NULL,
+    name_es TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS item_prices (
@@ -51,35 +55,55 @@ CREATE INDEX IF NOT EXISTS item_prices_server_item_stack_idx ON item_prices(serv
 
         private static async Task InsertServersAsync(string connString, DofusData dofusData, DofusTexts dofusTexts)
         {
-            StringBuilder queryBuilder = new("INSERT INTO servers(id, name_fr) VALUES ");
+            StringBuilder queryBuilder = new("INSERT INTO servers(id, name_en, name_fr, name_es) VALUES ");
             foreach (var server in dofusData.GetDataForType("Servers"))
             {
-                string serverName = dofusTexts.GetText((int)server.Value["nameId"]!, DofusLanguages.French);
-                queryBuilder.AppendFormat("({0}, '{1}'), ", server.Key, serverName.Replace("'", "''"));
+                int serverNameId = (int)server.Value["nameId"]!;
+                string serverNameEn = dofusTexts.GetText(serverNameId, DofusLanguages.English);
+                string serverNameFr = dofusTexts.GetText(serverNameId, DofusLanguages.French);
+                string serverNameEs = dofusTexts.GetText(serverNameId, DofusLanguages.Spanish);
+                queryBuilder.AppendFormat("({0}, '{1}', '{2}', '{3}'), ", server.Key,
+                    serverNameEn.Replace("'", "''"),
+                    serverNameFr.Replace("'", "''"),
+                    serverNameEs.Replace("'", "''"));
             }
 
             queryBuilder.Length -= ", ".Length;
-            queryBuilder.Append(" ON CONFLICT (id) DO UPDATE SET name_fr = EXCLUDED.name_fr;");
+            queryBuilder.Append(" ON CONFLICT (id) DO UPDATE SET name_en = EXCLUDED.name_en, name_fr = EXCLUDED.name_fr, name_es = EXCLUDED.name_es;");
 
             await RunQueryAsync(connString, queryBuilder.ToString());
         }
 
         private static async Task InsertItemsAsync(string connString, DofusData dofusData, DofusTexts dofusTexts)
         {
-            StringBuilder queryBuilder = new("INSERT INTO items(id, name_fr) VALUES ");
+            StringBuilder queryBuilder = new("INSERT INTO items(id, name_en, name_fr, name_es) VALUES ");
             foreach (var item in dofusData.GetDataForType("Items"))
             {
                 int itemNameId = (int)item.Value["nameId"]!;
-                if (!dofusTexts.TryGetText(itemNameId, DofusLanguages.French, out string? itemName))
+
+                if (!dofusTexts.TryGetText(itemNameId, DofusLanguages.English, out string? itemNameEn))
                 {
-                    itemName = item.Key.ToString();
+                    itemNameEn = item.Key.ToString();
                 }
 
-                queryBuilder.AppendFormat("({0}, '{1}'), ", item.Key, itemName.Replace("'", "''"));
+                if (!dofusTexts.TryGetText(itemNameId, DofusLanguages.French, out string? itemNameFr))
+                {
+                    itemNameFr = item.Key.ToString();
+                }
+
+                if (!dofusTexts.TryGetText(itemNameId, DofusLanguages.Spanish, out string? itemNameEs))
+                {
+                    itemNameEs = item.Key.ToString();
+                }
+
+                queryBuilder.AppendFormat("({0}, '{1}', '{2}', '{3}'), ", item.Key,
+                    itemNameEn.Replace("'", "''"),
+                    itemNameFr.Replace("'", "''"),
+                    itemNameEs.Replace("'", "''"));
             }
 
             queryBuilder.Length -= ", ".Length;
-            queryBuilder.Append(" ON CONFLICT (id) DO UPDATE SET name_fr = EXCLUDED.name_fr;");
+            queryBuilder.Append(" ON CONFLICT (id) DO UPDATE SET name_en = EXCLUDED.name_en, name_fr = EXCLUDED.name_fr, name_es = EXCLUDED.name_es;");
 
             await RunQueryAsync(connString, queryBuilder.ToString());
         }

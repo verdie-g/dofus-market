@@ -77,7 +77,9 @@
     group: "{{ dofus_market_api_user }}"
     mode: 0644
   loop:
+    - i18n/i18n_en.d2i
     - i18n/i18n_fr.d2i
+    - i18n/i18n_es.d2i
     - common/Servers.d2o
     - common/Items.d2o
 
