@@ -57,7 +57,6 @@ namespace DofusMarket.Bot.Frames
             }
 
             var exchange = await ReceiveMessageAsync<ExchangeStartedBidBuyerMessage>();
-            await ReceiveMessageAsync<BasicNoOperationMessage>();
             foreach (uint itemTypeId in exchange.BuyerDescriptor.Types)
             {
                 await SendMessageAsync(new ExchangeBidHouseTypeMessage
@@ -67,7 +66,6 @@ namespace DofusMarket.Bot.Frames
                 });
 
                 var exchangeType = await ReceiveMessageAsync<ExchangeTypesExchangerDescriptionForUserMessage>();
-                await ReceiveMessageAsync<BasicNoOperationMessage>();
                 foreach (uint itemId in exchangeType.TypeDescription)
                 {
                     await SendMessageAsync(new ExchangeBidHouseSearchMessage
@@ -76,31 +74,41 @@ namespace DofusMarket.Bot.Frames
                         Follow = true,
                     });
 
-                    switch (await ReceiveAnyMessageAsync(typeof(ExchangeTypesItemsExchangerDescriptionForUserMessage),
-                        typeof(BasicNoOperationMessage)))
+                    var item = await ReceiveMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
+                    // Check that all items received match the one requested.
+                    for (int i = 0; i < item.ItemTypeDescriptions.Length; i += 1)
                     {
-                        case ExchangeTypesItemsExchangerDescriptionForUserMessage item:
-                            for (int i = 0; i < StackSizes.Length; i += 1)
-                            {
-                                int price = (int)item.ItemTypeDescriptions
-                                    .Select(o => (int)o.Prices[i])
-                                    .Where(p => p != 0)
-                                    .DefaultIfEmpty()
-                                    .Average();
-                                if (price == 0) // 0 means that the item is not available for this set size.
-                                {
-                                    continue;
-                                }
+                        if (item.ItemTypeDescriptions[i].ObjectGid != itemId)
+                        {
+                            Logger.LogError(
+                                "Received item '{0}' didn't match request item '{1}' (index {2} in message)",
+                                item.ItemTypeDescriptions[i].ObjectGid,
+                                itemId, i);
+                        }
+                        else if (item.ItemTypeDescriptions[i].ObjectType != itemTypeId)
+                        {
+                            Logger.LogError(
+                                "Received item type '{0}' didn't match request item type '{1}' (index {2} in message)",
+                                item.ItemTypeDescriptions[i].ObjectType,
+                                itemTypeId, i);
+                        }
+                    }
 
-                                _metrics.WriteItemPrice(new ItemPrice(_serverId, (int)itemId, (int)itemTypeId,
-                                    StackSizes[i], price));
-                            }
-                            await ReceiveMessageAsync<BasicNoOperationMessage>();
-                            break;
+                    for (int i = 0; i < StackSizes.Length; i += 1)
+                    {
+                        int price = (int)item.ItemTypeDescriptions
+                            .Select(o => (int)o.Prices[i])
+                            .Where(p => p != 0)
+                            .DefaultIfEmpty()
+                            .Average();
+                        if (price == 0) // 0 means that the item is not available for this set size.
+                        {
+                            continue;
+                        }
 
-                        case BasicNoOperationMessage:
-                            Logger.LogInformation("Item {0} not found?", itemId);
-                            break;
+                        _metrics.WriteItemPrice(new ItemPrice(_serverId, item.ItemTypeDescriptions[0].ObjectGid,
+                            item.ItemTypeDescriptions[0].ObjectType,
+                            StackSizes[i], price));
                     }
 
                     // There is a maximum of items we can follow, so make sure to unfollow them.
@@ -109,10 +117,16 @@ namespace DofusMarket.Bot.Frames
                         GenId = (short)itemId,
                         Follow = false,
                     });
-                    await ReceiveMessageAsync<BasicNoOperationMessage>();
 
+                    await ReceiveMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
                     await Task.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
                 }
+
+                await SendMessageAsync(new ExchangeBidHouseTypeMessage
+                {
+                    Type = itemTypeId,
+                    Follow = false,
+                });
             }
 
             await SendMessageAsync(new LeaveDialogRequestMessage());
