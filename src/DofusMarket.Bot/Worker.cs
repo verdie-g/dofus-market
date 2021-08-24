@@ -22,7 +22,7 @@ namespace DofusMarket.Bot
 {
     internal class Worker : BackgroundService
     {
-        private static readonly DofusVersion DofusVersion = new() { Major = 2, Minor = 60, Code = 3, Build = 12, BuildType = BuildType.Release };
+        private static readonly DofusVersion DofusVersion = new() { Major = 2, Minor = 60, Code = 4, Build = 13, BuildType = BuildType.Release };
         private static readonly IPEndPoint DofusConnectionEndpoint = new(IPAddress.Parse("34.252.21.81"), 5555); // connection.host/port in config.xml
 
         private readonly CryptoService _cryptoService;
