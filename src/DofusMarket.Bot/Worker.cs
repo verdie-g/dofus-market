@@ -95,7 +95,7 @@ namespace DofusMarket.Bot
             }
 
             using DofusClient client = new(authenticationResult.ServerEndPoint, _loggerFactory.CreateLogger(typeof(DofusClient)));
-            FrameManager frameManager = new(client, _loggerFactory);
+            using FrameManager frameManager = new(client, _loggerFactory);
             frameManager.Register(new SynchronizationFrame());
             frameManager.Register(new LatencyFrame());
             frameManager.Register(new MiscFrame());
