@@ -1,0 +1,16 @@
+﻿multitenancy_enabled: false
+
+server:
+  http_listen_port: {{ mimir_port }}
+
+ingester:
+  ring:
+    replication_factor: 1
+
+ruler_storage:
+  filesystem:
+    dir: /data/ruler
+
+blocks_storage:
+  filesystem:
+    dir: /data/blocks

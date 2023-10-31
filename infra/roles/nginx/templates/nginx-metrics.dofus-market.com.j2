@@ -1,0 +1,19 @@
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name {{ dofus_market_metrics_domain_name }};
+
+    include /etc/nginx/snippets/dofus-market-ssl.conf;
+
+    # Close slow connections.
+    client_body_timeout 5s;
+    client_header_timeout 5s;
+
+    auth_basic "Metrics";
+    auth_basic_user_file htpasswd/{{ dofus_market_metrics_domain_name }};
+
+    location / {
+      proxy_set_header Host $http_host;
+      proxy_pass http://localhost:{{ mimir_port }};
+    }
+}

@@ -1,0 +1,85 @@
+---
+
+- name: create nginx configuration directory
+  file:
+    path: /opt/nginx
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: create nginx configuration file
+  template:
+    src: nginx.conf.j2
+    dest: /opt/nginx/nginx.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: create Dofus Market SSL snippet file
+  template:
+    src: nginx-ssl-snippet.conf.j2
+    dest: /opt/nginx/dofus-market-ssl.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: create virtual server configuration file
+  template:
+    src: "nginx-{{ item }}.j2"
+    dest: "/opt/nginx/{{ item }}"
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - "{{ dofus_market_domain_name }}"
+    - "{{ dofus_market_metrics_domain_name }}"
+
+- name: install python passlib
+  apt:
+    name: python3-passlib
+    state: present
+    update_cache: yes
+
+- name: create htpasswd for the metrics domain
+  htpasswd:
+    path: /opt/nginx/passwd-metrics
+    name: "{{ dofus_market_metrics_basic_auth_name }}"
+    password: "{{ dofus_market_metrics_basic_auth_password }}"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: start container
+  docker_container:
+    name: nginx
+    image: nginx
+    state: started
+    restart: true
+    network_mode: host
+    volumes:
+      - "/opt/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "/opt/nginx/{{ dofus_market_domain_name }}:/etc/nginx/sites-enabled/{{ dofus_market_domain_name }}:ro"
+      - "/opt/nginx/{{ dofus_market_metrics_domain_name }}:/etc/nginx/sites-enabled/{{ dofus_market_metrics_domain_name }}:ro"
+      - "/opt/nginx/dofus-market-ssl.conf:/etc/nginx/snippets/dofus-market-ssl.conf:ro"
+      - "/opt/nginx/passwd-metrics:/etc/nginx/htpasswd/{{ dofus_market_metrics_domain_name }}:ro"
+      - "/opt/certbot/www:/var/www/certbot:ro"
+      - "/opt/certbot/letsencrypt:/etc/letsencrypt:ro"
+
+- name: install ufw
+  apt:
+    name: ufw
+    state: present
+    update_cache: yes
+
+- name: open HTTP port
+  ufw:
+    rule: allow
+    port: "80"
+    proto: tcp
+
+- name: open HTTPS port
+  ufw:
+    rule: allow
+    port: "443"
+    proto: tcp

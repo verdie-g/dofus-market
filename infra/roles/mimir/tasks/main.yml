@@ -1,0 +1,39 @@
+---
+- name: create mimir configuration directory
+  file:
+    path: /opt/mimir
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: create mimir configuration file
+  template:
+    src: mimir.yml.j2
+    dest: /opt/mimir/mimir.yml
+    mode: 0644
+
+- name: create mimir data directory
+  file:
+    path: /opt/mimir/data
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: start container
+  docker_container:
+    name: mimir
+    image: grafana/mimir
+    state: started
+    restart: true
+    command: "-config.file=/etc/mimir.yml"
+    ports:
+      - "{{ mimir_port }}:{{ mimir_port }}"
+    volumes:
+      - "/opt/mimir/mimir.yml:/etc/mimir.yml:ro"
+      - "/opt/mimir/data:/data:rw"
+    networks:
+      - name: grafana-net
+    comparisons:
+      '*': strict

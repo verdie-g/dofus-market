@@ -1,0 +1,31 @@
+---
+- name: create docker volume
+  docker_volume:
+    name: grafana-storage
+
+- name: create docker network
+  docker_network:
+    name: grafana-net
+
+- name: start container
+  docker_container:
+    name: grafana
+    image: grafana/grafana-enterprise
+    state: started
+    restart: true
+    ports:
+      - "{{ grafana_port }}:{{ grafana_port }}"
+    volumes:
+      - "grafana-storage:/var/lib/grafana"
+      - "/opt/grafana/fav32.png:/usr/share/grafana/public/img/fav32.png"
+      - "/opt/grafana/apple-touch-icon.png:/usr/share/grafana/public/img/apple-touch-icon.png"
+    networks:
+      - name: grafana-net
+    env:
+      GF_SERVER_DOMAIN: "{{ dofus_market_domain_name }}"
+      GF_SERVER_HTTP_PORT: "{{ grafana_port | string }}"
+      GF_FEATURE_TOGGLES_ENABLE: publicDashboards
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_NAME: "Visitors"
+    comparisons:
+      '*': strict

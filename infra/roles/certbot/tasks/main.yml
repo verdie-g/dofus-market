@@ -1,0 +1,35 @@
+﻿---
+
+- name: create certbot configuration directory
+  file:
+    path: /opt/certbot
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: create certbot www directory
+  file:
+    path: /opt/certbot/www
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: create certbot letsencrypt directory
+  file:
+    path: /opt/certbot/letsencrypt
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: start container
+  docker_container:
+    name: certbot
+    image: certbot/certbot
+    state: started
+    command: "certonly --non-interactive -m {{ certbot_email }} --agree-tos --webroot --webroot-path /var/www/certbot --cert-name {{ dofus_market_domain_name }} -d {{ dofus_market_domain_name }},{{ dofus_market_domain_name_www }},{{ dofus_market_metrics_domain_name }}"
+    volumes:
+      - "/opt/certbot/www:/var/www/certbot:rw"
+      - "/opt/certbot/letsencrypt:/etc/letsencrypt:rw"
