@@ -1,0 +1,13 @@
+﻿ClientToScreen
+EnumWindows
+GetDC
+GetKeyboardLayout
+GetPixel
+GetSystemMetrics
+GetWindowText
+MoveWindow
+ReleaseDC
+SendInput
+SetForegroundWindow
+ShowWindow
+VkKeyScanEx
