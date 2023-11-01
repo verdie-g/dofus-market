@@ -168,6 +168,17 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
         throw new Exception("2FA expected");
     }
 
+    // Session expired
+    if (ankamaLauncherWindow.GetPixel(new Point(985, 505)) == ColorTranslator.FromHtml("#001519"))
+    {
+        logger.LogInformation("Session expired");
+
+        ankamaLauncherWindow.MouseClick(new Point(985, 505));
+        Keyboard.SendText(ankamaPassword);
+        Keyboard.Send("{ENTER}");
+        Thread.Sleep(1000);
+    }
+
     // Ankama Launcher Dofus
     ankamaLauncherWindow.WaitForPixel(new Point(386, 424), ColorTranslator.FromHtml("#FFFFFF"), TimeSpan.FromMinutes(5)); // Play button
     ankamaLauncherWindow.MouseClick(new Point(386, 424)); // Play
