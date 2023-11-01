@@ -24,6 +24,7 @@ internal class Window
         {
             window = GetWindow();
             Thread.Sleep(iterationDelay);
+            i += 1;
         } while (window == null && i < maxIterations);
 
         if (window == null)
