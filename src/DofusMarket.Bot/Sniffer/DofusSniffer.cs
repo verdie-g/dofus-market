@@ -49,7 +49,8 @@ internal class DofusSniffer : IDisposable
         _device = CaptureDeviceList.Instance.FirstOrDefault(d => d.Name == $"\\Device\\NPF_{{{_networkDeviceId}}}");
         if (_device == null)
         {
-            throw new Exception($"No device found with id '{_networkDeviceId}'");
+            string availableDevices = string.Join(", ", CaptureDeviceList.Instance.Select(d => $"{d.Name} ({d.Description})"));
+            throw new Exception($"No device found with id '{_networkDeviceId}'. Available devices: {availableDevices}");
         }
 
         Task.Run(() => FillPipeAsync(_tcpPipeCancellation.Token));

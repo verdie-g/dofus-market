@@ -53,7 +53,7 @@ async Task<List<ItemPrice>> CollectAllServerItemPricesAsync()
         Environment.GetEnvironmentVariable("ANKAMA_LOGIN")!,
         Environment.GetEnvironmentVariable("ANKAMA_PASSWORD")!);
 
-    string networkDeviceId = "4407813B-9937-4119-BA9D-A52FC9FA20A3";
+    string networkDeviceId = Environment.GetEnvironmentVariable("NETWORK_DEVICE_ID")!;
     using DofusSniffer sniffer = new DofusSniffer(networkDeviceId).Start();
     NetworkMessageReader messageReader = new(sniffer);
 
