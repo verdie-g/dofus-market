@@ -17,6 +17,7 @@ internal class DofusSniffer : IDisposable
     // From connection.host in config.xml.
     private const string DofusLoginServerHostName = "dofus2-co-production.ankama-games.com";
     private const string DofusGameServersIpRange = "172.65.0.0/16";
+    private const int DofusServersPort = 5555;
 
     private const int HeaderLengthBitSize = 2;
     private const int HeaderLengthSizeMask = 0x03;
@@ -75,7 +76,7 @@ internal class DofusSniffer : IDisposable
         var loginServerIpAddresses = await Dns.GetHostAddressesAsync(DofusLoginServerHostName, cancellationToken);
 
         _device.Open();
-        _device.Filter = $"tcp and (src port 5555) and (net {DofusGameServersIpRange} or host {string.Join<IPAddress>(" or host ", loginServerIpAddresses)})";
+        _device.Filter = $"tcp and (src port {DofusServersPort}) and (net {DofusGameServersIpRange} or host {string.Join<IPAddress>(" or host ", loginServerIpAddresses)})";
 
         Logger.LogInformation("Starting the sniffer filtering on \"{0}\"", _device.Filter);
 
