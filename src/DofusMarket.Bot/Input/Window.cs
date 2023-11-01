@@ -126,13 +126,13 @@ internal class Window
     {
         Point screenPoint = ConvertPointFromClientToScreen(clientPoint);
         var color = Screen.GetPixel(screenPoint);
-        Logger.LogDebug($"{nameof(Window)}.{nameof(GetPixel)}({clientPoint}) -> {color}");
+        Logger.LogDebug($"{nameof(Window)}.{nameof(GetPixel)}({clientPoint}) -> {ColorTranslator.ToHtml(color)}");
         return color;
     }
 
     public void WaitForPixel(Point clientPoint, Color expectedColor, TimeSpan? timeout = default)
     {
-        Logger.LogDebug($"{nameof(Window)}.{nameof(WaitForPixel)}({clientPoint}, {expectedColor}, {timeout})");
+        Logger.LogDebug($"{nameof(Window)}.{nameof(WaitForPixel)}({clientPoint}, {ColorTranslator.ToHtml(expectedColor)}, {timeout})");
 
         var iterationDelay = TimeSpan.FromMilliseconds(50);
         int maxIterations = timeout.HasValue ? (int)(timeout / iterationDelay) : int.MaxValue;
