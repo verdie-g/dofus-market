@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="ConnectToAllServers.ahk" CopyToOutputDirectory="Always" />
     <Content Include="NativeMethods.txt" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
