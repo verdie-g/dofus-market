@@ -76,6 +76,13 @@ internal class Window
         }
     }
 
+    public static Window GetForegroundWindow()
+    {
+        var windowHandle = PInvoke.GetForegroundWindow();
+        Win32Helper.ThrowIfZero(windowHandle.IsNull, nameof(PInvoke.GetForegroundWindow), false);
+        return new Window(windowHandle);
+    }
+
     private readonly HWND _handle;
 
     private Window(HWND handle)

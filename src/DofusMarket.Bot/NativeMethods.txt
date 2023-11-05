@@ -12,3 +12,4 @@ SendInput
 SetForegroundWindow
 ShowWindow
 VkKeyScanEx
+GetForegroundWindow
