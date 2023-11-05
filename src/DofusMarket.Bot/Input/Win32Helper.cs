@@ -18,13 +18,13 @@ internal static class Win32Helper
             return;
         }
 
-        string message = $"{functionName} returned {ret}";
         if (useLastError)
         {
             int errorCode = Marshal.GetLastWin32Error();
-            throw new Win32Exception(errorCode, message);
+            Win32Exception win32Exception = new(errorCode);
+            throw new Win32Exception(errorCode, $"{functionName}: {win32Exception.Message}");
         }
 
-        throw new Win32Exception(message);
+        throw new Win32Exception($"{functionName} returned {ret}");
     }
 }
