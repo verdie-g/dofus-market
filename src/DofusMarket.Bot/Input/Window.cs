@@ -114,6 +114,14 @@ internal class Window
         Mouse.Click(screenPoint, clickCount);
     }
 
+    public void MouseMove(Point clientPoint)
+    {
+        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseClick)}({clientPoint})");
+
+        Point screenPoint = ConvertPointFromClientToScreen(clientPoint);
+        Mouse.Move(screenPoint);
+    }
+
     public void MouseScroll(Point clientPoint, int count)
     {
         Logger.LogDebug($"{nameof(Window)}.{nameof(MouseScroll)}({clientPoint}, {count})");

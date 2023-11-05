@@ -14,6 +14,11 @@ internal static class Mouse
             clickCount > 0 ? MOUSE_EVENT_FLAGS.MOUSEEVENTF_LEFTDOWN | MOUSE_EVENT_FLAGS.MOUSEEVENTF_LEFTUP : 0);
     }
 
+    public static void Move(Point point)
+    {
+        SendMouseEvent(point, 1, 0, 0);
+    }
+
     public static void Scroll(Point point, int count = 1)
     {
         const uint wheelDelta = 120;
