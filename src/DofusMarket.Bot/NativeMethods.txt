@@ -1,4 +1,5 @@
-﻿ClientToScreen
+﻿CLR_INVALID
+ClientToScreen
 EnumWindows
 GetDC
 GetKeyboardLayout
