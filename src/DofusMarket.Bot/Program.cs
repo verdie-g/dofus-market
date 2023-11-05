@@ -24,7 +24,7 @@ while (true)
     try
     {
         var allItemPrices = await CollectAllServerItemPricesAsync();
-        KillDofus();
+        KillAll("dofus");
 
         string dofusPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Ankama", "Dofus");
@@ -114,7 +114,8 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
 {
     var logger = LoggerProvider.CreateLogger<Program>();
 
-    KillDofus();
+    KillAll("dofus");
+    KillAll("Ankama Launcher");
 
     using var ankamaLauncherProcess = RunAnkamaLauncher();
     // It seems like launcher opens a window and quickly replace it so wait a little before getting the window handle.
@@ -124,7 +125,7 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
     ankamaLauncherWindow.Show();
     ankamaLauncherWindow.MoveWindow(new Rectangle(0, 0, 1920, 1080));
     ankamaLauncherWindow.Focus();
-    Thread.Sleep(3000); // Wait for loading to end.
+    Thread.Sleep(5000); // Wait for loading to end (TODO: find a better way than a sleep).
 
     // Session expired
     if (ankamaLauncherWindow.GetPixel(new Point(1133, 599)) == ColorTranslator.FromHtml("#335F69"))
@@ -296,9 +297,9 @@ async Task ClickAllItemFromScrollableListAsync(Window dofusWindow, int itemCount
     }
 }
 
-void KillDofus()
+void KillAll(string processName)
 {
-    foreach (var dofusProcess in Process.GetProcessesByName("dofus"))
+    foreach (var dofusProcess in Process.GetProcessesByName(processName))
     {
         dofusProcess.Kill();
         dofusProcess.WaitForExit(TimeSpan.FromSeconds(10));
