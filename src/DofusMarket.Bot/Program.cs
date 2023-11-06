@@ -13,7 +13,12 @@ using mtanksl.ActionMessageFormat;
 var loggerFactory = LoggerFactory.Create(builder =>
 {
     builder
-        .AddSimpleConsole(options => options.SingleLine = true)
+        .AddSimpleConsole(options =>
+        {
+            options.SingleLine = true;
+            options.TimestampFormat = "HH:mm:ss.ffff ";
+            options.UseUtcTimestamp = true;
+        })
         .SetMinimumLevel(LogLevel.Debug);
 });
 LoggerProvider.Initialize(loggerFactory);
