@@ -273,7 +273,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
     dofusWindow.MouseClick(new Point(1203, 65)); // Close auction house
 
     LoggerProvider.CreateLogger<Program>()
-        .LogInformation("Collected item prices from server {0} in {2} minutes",
+        .LogInformation("Collected item prices from server {0} in {1} minutes",
             serverId, (int)sw.Elapsed.TotalMinutes);
 }
 
