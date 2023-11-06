@@ -222,7 +222,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
         itemVisible: 16,
         itemPerScroll: 3,
         itemLineHeightPx: 32,
-        firstItemPosition: new Point(350, 355),
+        firstItemPosition: new Point(380, 355),
         itemFunc: async (_, itemTypePosition) =>
         {
             // Select item type.
