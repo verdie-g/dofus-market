@@ -96,15 +96,16 @@ internal class DofusMarketMetrics
         var tags = new List<KeyValuePair<string, object?>>()
         {
             new("server.id", itemPrice.ServerId),
-            new("server.name_fr", serverNameFr),
-            new("server.name_canonical_fr", serverNameCanonicalFr),
+            new("server.name", serverNameFr),
+            new("server.name_canonical", serverNameCanonicalFr),
             new("item.id", itemPrice.ItemId),
-            new("item.name_fr", itemNameFr),
-            new("item.name_canonical_fr", itemNameCanonicalFr),
+            new("item.name", itemNameFr),
+            new("item.name_canonical", itemNameCanonicalFr),
             new("item.level", itemLevel),
             new("item_type.id", itemTypeId),
-            new("item_type.name_fr", itemTypeNameFr),
-            new("item_type.name_canonical_fr", itemTypeNameCanonicalFr),
+            new("item_type.name", itemTypeNameFr),
+            new("item_type.name_canonical", itemTypeNameCanonicalFr),
+            new("language", DofusLanguages.French),
         };
 
         if (itemPrice.Quantity.HasValue)
