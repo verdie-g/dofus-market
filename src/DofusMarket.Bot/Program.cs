@@ -266,6 +266,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                     // Unselect item.
                     dofusWindow.MouseClick(itemPosition);
                     await Task.Delay(500);
+                    await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
                 });
 
             // Unselect item type.
