@@ -67,6 +67,7 @@ async Task<List<ItemPrice>> CollectAllServerItemPricesAsync()
         .Where(s => s.Type != 2 && s.CharactersCount > 0) // idk what type 2 is but they are not displayed
         .OrderBy(s => s.Type)
         .ToArray();
+    await Task.Delay(250);
     for (int i = 0; i < servers.Length; i += 1)
     {
         await Task.Delay(50);
@@ -74,6 +75,7 @@ async Task<List<ItemPrice>> CollectAllServerItemPricesAsync()
         await Task.Delay(50);
         dofusWindow.MouseScroll(new Point(920, 260), 3); // Scroll up
         dofusWindow.MouseClick(new Point(920, 260)); // First server
+        dofusWindow.Focus(); // Focus before sending text. TODO: Only use mouse here.
         Keyboard.Send($"{{DOWN {i}}}");
         if (servers[i].Type >= 4) // Skip epic banner
         {
@@ -98,7 +100,7 @@ async Task<List<ItemPrice>> CollectAllServerItemPricesAsync()
             messageReader, selectedServer.ServerId, mapInfo.MapId);
         itemPrices.AddRange(serverItemPrices);
 
-        Keyboard.Send("{ESC}");
+        dofusWindow.MouseClick(new Point(1882, 16)); // Exit
         await Task.Delay(200);
         dofusWindow.MouseClick(new Point(1006, 481)); // Change server
         await Task.Delay(200);
@@ -115,18 +117,18 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
     var logger = LoggerProvider.CreateLogger<Program>();
 
     KillAll("dofus");
-    KillAll("Ankama Launcher");
 
     using var ankamaLauncherProcess = RunAnkamaLauncher();
     // It seems like launcher opens a window and quickly replace it so wait a little before getting the window handle.
     Thread.Sleep(2000);
     var ankamaLauncherWindow = Window.WaitForWindow("Ankama Launcher", TimeSpan.FromSeconds(5));
 
-    ankamaLauncherWindow.Show();
-    ankamaLauncherWindow.MoveWindow(new Rectangle(0, 0, 1920, 1080));
     ankamaLauncherWindow.Focus();
-    Thread.Sleep(5000); // Wait for loading to end (TODO: find a better way than a sleep).
+    ankamaLauncherWindow.MoveWindow(new Rectangle(0, 0, 1920, 1080));
 
+    Thread.Sleep(4000); // Wait for loading to end (TODO: find a better way than a sleep).
+
+#if false
     // Session expired
     if (ankamaLauncherWindow.GetPixel(new Point(1133, 599)) == ColorTranslator.FromHtml("#335F69"))
     {
@@ -157,6 +159,7 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
 
     // Ankama Launcher Login
     ankamaLauncherWindow.MouseClick(new Point(86, 448), 3); // Ankama login input
+    ankamaLauncherWindow.Focus(); // Focus before sending text.
     Keyboard.SendText(ankamaLogin);
     Keyboard.Send("{TAB}");
     Keyboard.SendText(ankamaPassword);
@@ -176,12 +179,13 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
 
         ankamaLauncherWindow.MouseClick(new Point(985, 505));
         Keyboard.SendText(ankamaPassword);
-        Keyboard.Send("{ENTER}");
+        ankamaLauncherWindow.MouseClick(new Point(916, 598));
         Thread.Sleep(1000);
     }
 
     // Ankama Launcher Dofus
     ankamaLauncherWindow.WaitForPixel(new Point(386, 424), ColorTranslator.FromHtml("#FFFFFF"), TimeSpan.FromMinutes(5)); // Play button
+#endif
     ankamaLauncherWindow.MouseClick(new Point(386, 424)); // Play
 }
 
@@ -194,11 +198,13 @@ async Task<List<ItemPrice>> CollectAllItemPricesFromCurrentMapAuctionHouseAsync(
     {
         73400322 => new Point(1355, 636), // Koalak
         153879299 => new Point(1100, 360), // Incarnam
+        90707714 => new Point(994, 272), // Sufokia
         _ => throw new Exception($"Unexpected map id {mapId} on server {serverId}"),
     };
 
     dofusWindow.MouseClick(auctionHousePos); // Auction house
     var buyerDescriptor = (await messageReader.WaitForMessageAsync<ExchangeStartedBidBuyerMessage>()).BuyerDescriptor;
+    await Task.Delay(TimeSpan.FromMilliseconds(1500));
 
     List<ItemPrice> itemPrices = new();
 
@@ -212,6 +218,7 @@ async Task<List<ItemPrice>> CollectAllItemPricesFromCurrentMapAuctionHouseAsync(
         itemFunc: async () =>
         {
             var exchangeTypes = await messageReader.WaitForMessageAsync<ExchangeTypesExchangerDescriptionForUserMessage>();
+            await Task.Delay(TimeSpan.FromMilliseconds(1500));
 
             await ClickAllItemFromScrollableListAsync(
                 dofusWindow,
@@ -223,6 +230,8 @@ async Task<List<ItemPrice>> CollectAllItemPricesFromCurrentMapAuctionHouseAsync(
                 itemFunc: async () =>
                 {
                     var exchangeTypesItems = await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
+                    await Task.Delay(TimeSpan.FromMilliseconds(500));
+
                     for (int i = 0; i < buyerDescriptor.Quantities.Length; i += 1)
                     {
                         long price = (long)exchangeTypesItems.ItemTypeDescriptions
@@ -241,7 +250,7 @@ async Task<List<ItemPrice>> CollectAllItemPricesFromCurrentMapAuctionHouseAsync(
                 });
         });
 
-    Keyboard.Send("{ESC}"); // Close auction house
+    dofusWindow.MouseClick(new Point(1203, 65)); // Close auction house
 
     LoggerProvider.CreateLogger<Program>()
         .LogInformation("Collected {0} item prices from server {1} in {2} minutes",
@@ -274,13 +283,12 @@ async Task ClickAllItemFromScrollableListAsync(Window dofusWindow, int itemCount
 
         for (int j = 0; j < itemsToScan; j += 1)
         {
-            // Select item type.
+            // Select item.
             dofusWindow.MouseClick(currentItemPos);
-            await Task.Delay(500);
 
             await itemFunc();
 
-            // Unselect item type.
+            // Unselect item.
             dofusWindow.MouseClick(currentItemPos);
             await Task.Delay(500);
 

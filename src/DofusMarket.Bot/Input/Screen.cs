@@ -12,10 +12,10 @@ internal static class Screen
         Win32Helper.ThrowIfZero(deviceContextHandle.Value, nameof(PInvoke.GetDC), false);
 
         var colorRef = PInvoke.GetPixel(deviceContextHandle, point.X, point.Y);
-        Win32Helper.ThrowIfZero(colorRef.Value != PInvoke.CLR_INVALID, nameof(PInvoke.GetPixel), false);
+        Win32Helper.ThrowIfFalse(colorRef.Value != PInvoke.CLR_INVALID, nameof(PInvoke.GetPixel), false);
 
         bool ok = PInvoke.ReleaseDC(HWND.Null, deviceContextHandle) == 1;
-        Win32Helper.ThrowIfZero(ok, nameof(PInvoke.ReleaseDC), true);
+        Win32Helper.ThrowIfFalse(ok, nameof(PInvoke.ReleaseDC), true);
 
         return Color.FromArgb(
             alpha: 255,

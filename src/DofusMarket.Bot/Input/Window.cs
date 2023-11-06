@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.System.SystemServices;
 using Windows.Win32.UI.WindowsAndMessaging;
 using DofusMarket.Bot.Logging;
 using Microsoft.Extensions.Logging;
@@ -76,13 +78,6 @@ internal class Window
         }
     }
 
-    public static Window GetForegroundWindow()
-    {
-        var windowHandle = PInvoke.GetForegroundWindow();
-        Win32Helper.ThrowIfZero(windowHandle.IsNull, nameof(PInvoke.GetForegroundWindow), false);
-        return new Window(windowHandle);
-    }
-
     private readonly HWND _handle;
 
     private Window(HWND handle)
@@ -101,8 +96,7 @@ internal class Window
     {
         Logger.LogDebug($"{nameof(Window)}.{nameof(Focus)}()");
 
-        bool ok = PInvoke.SetForegroundWindow(_handle);
-        Win32Helper.ThrowIfZero(ok, nameof(PInvoke.SetForegroundWindow), true);
+        PInvoke.SetForegroundWindow(_handle);
     }
 
     public void MoveWindow(Rectangle rec)
@@ -110,31 +104,40 @@ internal class Window
         Logger.LogDebug($"{nameof(Window)}.{nameof(MoveWindow)}({rec})");
 
         bool ok = PInvoke.MoveWindow(_handle, rec.X, rec.Y, rec.Width, rec.Height, true);
-        Win32Helper.ThrowIfZero(ok, nameof(PInvoke.MoveWindow), true);
+        Win32Helper.ThrowIfFalse(ok, nameof(PInvoke.MoveWindow), true);
     }
 
-    public void MouseClick(Point clientPoint, int clickCount = 1)
+    public void MouseClick(Point point, int clickCount = 1)
     {
-        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseClick)}({clientPoint}, {clickCount})");
+        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseClick)}({point}, {clickCount})");
 
-        Point screenPoint = ConvertPointFromClientToScreen(clientPoint);
-        Mouse.Click(screenPoint, clickCount);
+        foreach (var msgType in new[] { PInvoke.WM_LBUTTONDOWN, PInvoke.WM_LBUTTONUP })
+        {
+            var res = PInvoke.SendMessage(_handle, msgType, (nuint)MODIFIERKEYS_FLAGS.MK_LBUTTON,
+                PointToLParam(point));
+            Win32Helper.ThrowIfFalse(res == 0, nameof(PInvoke.SendMessage), false);
+        }
     }
 
-    public void MouseMove(Point clientPoint)
+    public void MouseMove(Point point)
     {
-        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseClick)}({clientPoint})");
+        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseMove)}({point})");
 
-        Point screenPoint = ConvertPointFromClientToScreen(clientPoint);
-        Mouse.Move(screenPoint);
+        var res = PInvoke.SendMessage(_handle, PInvoke.WM_MOUSEMOVE, 0,
+            PointToLParam(point));
+        Win32Helper.ThrowIfFalse(res == 0, nameof(PInvoke.SendMessage), false);
     }
 
-    public void MouseScroll(Point clientPoint, int count)
+    public void MouseScroll(Point point, int count)
     {
-        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseScroll)}({clientPoint}, {count})");
+        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseScroll)}({point}, {count})");
 
-        Point screenPoint = ConvertPointFromClientToScreen(clientPoint);
-        Mouse.Scroll(screenPoint, count);
+        var res = PInvoke.SendMessage(
+            _handle,
+            PInvoke.WM_MOUSEWHEEL,
+            PInvoke.MAKEWPARAM(0, (ushort)(PInvoke.WHEEL_DELTA * count)),
+            PointToLParam(point)); // TODO: should be relative to the screen?
+        Win32Helper.ThrowIfFalse(res == 0, nameof(PInvoke.SendMessage), false);
     }
 
     public Color GetPixel(Point clientPoint)
@@ -145,9 +148,9 @@ internal class Window
         return color;
     }
 
-    public void WaitForPixel(Point clientPoint, Color expectedColor, TimeSpan? timeout = default)
+    public void WaitForPixel(Point point, Color expectedColor, TimeSpan? timeout = default)
     {
-        Logger.LogDebug($"{nameof(Window)}.{nameof(WaitForPixel)}({clientPoint}, {ColorTranslator.ToHtml(expectedColor)}, {timeout})");
+        Logger.LogDebug($"{nameof(Window)}.{nameof(WaitForPixel)}({point}, {ColorTranslator.ToHtml(expectedColor)}, {timeout})");
 
         var iterationDelay = TimeSpan.FromMilliseconds(50);
         int maxIterations = timeout.HasValue ? (int)(timeout / iterationDelay) : int.MaxValue;
@@ -156,21 +159,26 @@ internal class Window
         Color actualColor;
         do
         {
-            actualColor = GetPixel(clientPoint);
+            actualColor = GetPixel(point);
             Thread.Sleep(iterationDelay);
         } while (actualColor != expectedColor && i < maxIterations);
 
         if (i >= maxIterations)
         {
-            throw new TimeoutException($"Pixel ({clientPoint.X}, {clientPoint.Y}) color was not {expectedColor} after {timeout}");
+            throw new TimeoutException($"Pixel ({point.X}, {point.Y}) color was not {expectedColor} after {timeout}");
         }
     }
 
-    private Point ConvertPointFromClientToScreen(Point clientPoint)
+    private Point ConvertPointFromClientToScreen(Point point)
     {
-        Point screenPoint = clientPoint;
+        Point screenPoint = point;
         bool ok = PInvoke.ClientToScreen(_handle, ref screenPoint);
-        Win32Helper.ThrowIfZero(ok, nameof(PInvoke.ClientToScreen), false);
+        Win32Helper.ThrowIfFalse(ok, nameof(PInvoke.ClientToScreen), false);
         return screenPoint;
+    }
+
+    private LPARAM PointToLParam(Point point)
+    {
+        return PInvoke.MAKELPARAM((ushort)point.X, (ushort)point.Y);
     }
 }

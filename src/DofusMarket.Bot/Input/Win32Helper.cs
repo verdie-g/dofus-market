@@ -6,7 +6,7 @@ namespace DofusMarket.Bot.Input;
 
 internal static class Win32Helper
 {
-    public static void ThrowIfZero(bool ret, string functionName, bool useLastError)
+    public static void ThrowIfFalse(bool ret, string functionName, bool useLastError)
     {
         ThrowIfZero(ret ? 1 : 0, functionName, useLastError);
     }
