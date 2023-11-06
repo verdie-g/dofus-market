@@ -18,9 +18,11 @@ internal class NetworkMessageReader
     {
         Logger.LogDebug($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>()");
 
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
+
         do
         {
-            if (!await _messageEnumerator.MoveNextAsync())
+            if (!await _messageEnumerator.MoveNextAsync().AsTask().WaitAsync(cts.Token))
             {
                 throw new InvalidOperationException("No more messages");
             }
