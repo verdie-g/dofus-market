@@ -309,6 +309,7 @@ async Task ScrollListAsync(Window dofusWindow, int itemCount, int itemVisible, i
 
         currentItemPos.Y -= itemPerScroll * itemLineHeightPx;
         dofusWindow.MouseScroll(currentItemPos, -1);
+        await Task.Delay(TimeSpan.FromMilliseconds(100));
     }
 }
 
