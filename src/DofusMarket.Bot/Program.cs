@@ -99,7 +99,7 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
             }
 
             await Task.Delay(50);
-            dofusWindow.MouseClick(new Point(739, 178)); // Order servers by name
+            dofusWindow.MouseClick(new Point(739, 178), debugName: "Order servers by name");
             await Task.Delay(50);
             dofusWindow.MouseClick(serverPosition, 2);
 
@@ -107,7 +107,7 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
             var selectedServer = await messageReader.WaitForMessageAsync<SelectedServerDataMessage>();
             await messageReader.WaitForMessageAsync<CharactersListMessage>();
             await Task.Delay(50);
-            dofusWindow.MouseClick(new Point(1256, 809)); // Play
+            dofusWindow.MouseClick(new Point(1256, 809), debugName: "Play");
 
             var mapInfo = await messageReader.WaitForMessageAsync<MapComplementaryInformationsDataMessage>();
             await Task.Delay(1000);
@@ -115,11 +115,11 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
             await CollectAllItemPricesFromCurrentMapAuctionHouseAsync(dofusWindow,
                 messageReader, selectedServer.ServerId, mapInfo.MapId, metrics);
 
-            dofusWindow.MouseClick(new Point(1882, 16)); // Exit
+            dofusWindow.MouseClick(new Point(1882, 16), debugName: "Exit");
             await Task.Delay(200);
-            dofusWindow.MouseClick(new Point(1006, 481)); // Change server
+            dofusWindow.MouseClick(new Point(1006, 481), debugName: "Change server");
             await Task.Delay(200);
-            dofusWindow.MouseClick(new Point(875, 551)); // Confirm
+            dofusWindow.MouseClick(new Point(875, 551), debugName: "Confirm");
 
             await messageReader.WaitForMessageAsync<ServerListMessage>();
         });
@@ -199,7 +199,7 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
     // Ankama Launcher Dofus
     ankamaLauncherWindow.WaitForPixel(new Point(386, 424), ColorTranslator.FromHtml("#FFFFFF"), TimeSpan.FromMinutes(5)); // Play button
 #endif
-    ankamaLauncherWindow.MouseClick(new Point(386, 424)); // Play
+    ankamaLauncherWindow.MouseClick(new Point(386, 424), debugName: "Play");
 }
 
 async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindow,
@@ -215,7 +215,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
         _ => throw new Exception($"Unexpected map id {mapId} on server {serverId}"),
     };
 
-    dofusWindow.MouseClick(auctionHousePos); // Auction house
+    dofusWindow.MouseClick(auctionHousePos, debugName: "Open auction house");
     var buyerDescriptor = (await messageReader.WaitForMessageAsync<ExchangeStartedBidBuyerMessage>()).BuyerDescriptor;
     await Task.Delay(TimeSpan.FromMilliseconds(1500));
 
@@ -228,8 +228,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
         firstItemPosition: new Point(380, 355),
         itemFunc: async (_, itemTypePosition) =>
         {
-            // Select item type.
-            dofusWindow.MouseClick(itemTypePosition);
+            dofusWindow.MouseClick(itemTypePosition, debugName: "Select item type");
             var exchangeTypes = await messageReader.WaitForMessageAsync<ExchangeTypesExchangerDescriptionForUserMessage>();
             await Task.Delay(TimeSpan.FromMilliseconds(1500));
 
@@ -242,8 +241,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                 firstItemPosition: new Point(660, 210),
                 itemFunc: async (_, itemPosition) =>
                 {
-                    // Select item.
-                    dofusWindow.MouseClick(itemPosition);
+                    dofusWindow.MouseClick(itemPosition, debugName: "Select item");
                     var exchangeTypesItems = await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
                     await Task.Delay(TimeSpan.FromMilliseconds(500));
 
@@ -263,18 +261,16 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                             (int)buyerDescriptor.Quantities[i], price));
                     }
 
-                    // Unselect item.
-                    dofusWindow.MouseClick(itemPosition);
+                    dofusWindow.MouseClick(itemPosition, debugName: "Unselect item");
                     await Task.Delay(500);
                     await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
                 });
 
-            // Unselect item type.
-            dofusWindow.MouseClick(itemTypePosition);
+            dofusWindow.MouseClick(itemTypePosition, debugName: "Unselect item type");
             await Task.Delay(500);
         });
 
-    dofusWindow.MouseClick(new Point(1203, 65)); // Close auction house
+    dofusWindow.MouseClick(new Point(1203, 65), debugName: "Close auction house");
 
     LoggerProvider.CreateLogger<Program>()
         .LogInformation("Collected item prices from server {0} in {1} minutes",

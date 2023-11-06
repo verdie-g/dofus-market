@@ -107,9 +107,9 @@ internal class Window
         Win32Helper.ThrowIfFalse(ok, nameof(PInvoke.MoveWindow), true);
     }
 
-    public void MouseClick(Point point, int clickCount = 1)
+    public void MouseClick(Point point, int clickCount = 1, string? debugName = null)
     {
-        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseClick)}({point}, {clickCount})");
+        Logger.LogDebug($"{nameof(Window)}.{nameof(MouseClick)}({point}, {clickCount}, \"{debugName}\")");
 
         for (int i = 0; i < clickCount; i += 1)
         {
