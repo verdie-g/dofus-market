@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Drawing;
 using DofusMarket.Bot;
 using DofusMarket.Bot.DataReader;
 using DofusMarket.Bot.Input;
-using DofusMarket.Bot.Internationalization;
 using DofusMarket.Bot.Logging;
 using DofusMarket.Bot.Sniffer;
 using DofusMarket.Bot.Sniffer.Messages;
+using DofusMarket.Bot.Sniffer.Types;
 using Microsoft.Extensions.Logging;
 using mtanksl.ActionMessageFormat;
 
@@ -23,20 +22,17 @@ while (true)
 {
     try
     {
-        var allItemPrices = await CollectAllServerItemPricesAsync();
         KillAll("dofus");
 
         string dofusPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Ankama", "Dofus");
         var dofusData = DofusData.New(dofusPath, new[] { "Servers", "Items", "ItemTypes" });
+        DofusMarketMetrics metrics = new(dofusData);
 
-        var itemPriceMeasurements = ConvertItemPricesToMeasurements(allItemPrices, dofusData);
-        DofusMarketMetrics.UpdateItemPriceMeasurements(itemPriceMeasurements);
+        await CollectAllServerItemPricesAsync(metrics);
 
-        var itemAveragePrices = ReadServersAverageItemPrices();
-        var itemAveragePriceMeasurements =
-            ConvertServersItemPricesToMeasurements(itemAveragePrices, dofusData).ToArray();
-        DofusMarketMetrics.UpdateAverageItemPriceMeasurements(itemAveragePriceMeasurements);
+        var itemAveragePrices = ReadServersAverageItemPrices(dofusData);
+        metrics.WriteItemAveragePrices(itemAveragePrices);
     }
     catch (Exception e)
     {
@@ -46,9 +42,8 @@ while (true)
     await Task.Delay(TimeSpan.FromHours(10));
 }
 
-async Task<List<ItemPrice>> CollectAllServerItemPricesAsync()
+async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
 {
-    List<ItemPrice> itemPrices = new();
     RunDofus(
         Environment.GetEnvironmentVariable("ANKAMA_LOGIN")!,
         Environment.GetEnvironmentVariable("ANKAMA_PASSWORD")!);
@@ -63,53 +58,63 @@ async Task<List<ItemPrice>> CollectAllServerItemPricesAsync()
 
     // Dofus Server Selection
     var serverList = await messageReader.WaitForMessageAsync<ServerListMessage>();
-    var servers = serverList.GameServerInformation
+    List<GameServerInformation?> servers = serverList.GameServerInformation
         .Where(s => s.Type != 2 && s.CharactersCount > 0) // idk what type 2 is but they are not displayed
         .OrderBy(s => s.Type)
-        .ToArray();
-    await Task.Delay(250);
-    for (int i = 0; i < servers.Length; i += 1)
+        .ToList()!;
+    byte lastServerType = byte.MaxValue;
+    for (int i = 0; i < servers.Count; i += 1)
     {
-        await Task.Delay(50);
-        dofusWindow.MouseClick(new Point(739, 178)); // Order servers by name
-        await Task.Delay(50);
-        dofusWindow.MouseScroll(new Point(920, 260), 3); // Scroll up
-        dofusWindow.MouseClick(new Point(920, 260)); // First server
-        dofusWindow.Focus(); // Focus before sending text. TODO: Only use mouse here.
-        Keyboard.Send($"{{DOWN {i}}}");
-        if (servers[i].Type >= 4) // Skip epic banner
+        var serverType = servers[i]!.Type;
+        if (serverType != lastServerType)
         {
-            Keyboard.Send("{DOWN}");
+            servers.Insert(i, null); // Insert null to represent the server type banner.
+            i += 1;
         }
-        if (servers[i].Type >= 5) // Skip temporis banner
-        {
-            Keyboard.Send("{DOWN}");
-        }
-        Keyboard.Send("{ENTER}");
 
-        // Dofus Character Selection
-        var selectedServer = await messageReader.WaitForMessageAsync<SelectedServerDataMessage>();
-        await messageReader.WaitForMessageAsync<CharactersListMessage>();
-        await Task.Delay(50);
-        dofusWindow.MouseClick(new Point(1256, 809)); // Play
-
-        var mapInfo = await messageReader.WaitForMessageAsync<MapComplementaryInformationsDataMessage>();
-        await Task.Delay(1000);
-
-        var serverItemPrices = await CollectAllItemPricesFromCurrentMapAuctionHouseAsync(dofusWindow,
-            messageReader, selectedServer.ServerId, mapInfo.MapId);
-        itemPrices.AddRange(serverItemPrices);
-
-        dofusWindow.MouseClick(new Point(1882, 16)); // Exit
-        await Task.Delay(200);
-        dofusWindow.MouseClick(new Point(1006, 481)); // Change server
-        await Task.Delay(200);
-        dofusWindow.MouseClick(new Point(875, 551)); // Confirm
-
-        await messageReader.WaitForMessageAsync<ServerListMessage>();
+        lastServerType = serverType;
     }
+    await Task.Delay(250);
 
-    return itemPrices;
+    await ScrollListAsync(
+        dofusWindow,
+        itemCount: servers.Count,
+        itemVisible: 12,
+        itemPerScroll: 3,
+        itemLineHeightPx: 45,
+        firstItemPosition: new Point(900, 220),
+        itemFunc: async (serverIdx, serverPosition) =>
+        {
+            if (servers[serverIdx] == null)
+            {
+                return;
+            }
+
+            await Task.Delay(50);
+            dofusWindow.MouseClick(new Point(739, 178)); // Order servers by name
+            await Task.Delay(50);
+            dofusWindow.MouseClick(serverPosition, 2);
+
+            // Dofus Character Selection
+            var selectedServer = await messageReader.WaitForMessageAsync<SelectedServerDataMessage>();
+            await messageReader.WaitForMessageAsync<CharactersListMessage>();
+            await Task.Delay(50);
+            dofusWindow.MouseClick(new Point(1256, 809)); // Play
+
+            var mapInfo = await messageReader.WaitForMessageAsync<MapComplementaryInformationsDataMessage>();
+            await Task.Delay(1000);
+
+            await CollectAllItemPricesFromCurrentMapAuctionHouseAsync(dofusWindow,
+                messageReader, selectedServer.ServerId, mapInfo.MapId, metrics);
+
+            dofusWindow.MouseClick(new Point(1882, 16)); // Exit
+            await Task.Delay(200);
+            dofusWindow.MouseClick(new Point(1006, 481)); // Change server
+            await Task.Delay(200);
+            dofusWindow.MouseClick(new Point(875, 551)); // Confirm
+
+            await messageReader.WaitForMessageAsync<ServerListMessage>();
+        });
 }
 
 void RunDofus(string ankamaLogin, string ankamaPassword)
@@ -189,8 +194,8 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
     ankamaLauncherWindow.MouseClick(new Point(386, 424)); // Play
 }
 
-async Task<List<ItemPrice>> CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindow,
-    NetworkMessageReader messageReader, uint serverId, long mapId)
+async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindow,
+    NetworkMessageReader messageReader, uint serverId, long mapId, DofusMarketMetrics metrics)
 {
     var sw = Stopwatch.StartNew();
 
@@ -206,29 +211,31 @@ async Task<List<ItemPrice>> CollectAllItemPricesFromCurrentMapAuctionHouseAsync(
     var buyerDescriptor = (await messageReader.WaitForMessageAsync<ExchangeStartedBidBuyerMessage>()).BuyerDescriptor;
     await Task.Delay(TimeSpan.FromMilliseconds(1500));
 
-    List<ItemPrice> itemPrices = new();
-
-    await ClickAllItemFromScrollableListAsync(
+    await ScrollListAsync(
         dofusWindow,
         itemCount: 59, // Different from BuyerDescriptor.Types.Length for some reason.
         itemVisible: 16,
         itemPerScroll: 3,
         itemLineHeightPx: 32,
         firstItemPosition: new Point(350, 355),
-        itemFunc: async () =>
+        itemFunc: async (_, itemTypePosition) =>
         {
+            // Select item type.
+            dofusWindow.MouseClick(itemTypePosition);
             var exchangeTypes = await messageReader.WaitForMessageAsync<ExchangeTypesExchangerDescriptionForUserMessage>();
             await Task.Delay(TimeSpan.FromMilliseconds(1500));
 
-            await ClickAllItemFromScrollableListAsync(
+            await ScrollListAsync(
                 dofusWindow,
                 itemCount: exchangeTypes.TypeDescription.Length,
                 itemVisible: 14,
                 itemPerScroll: 3,
                 itemLineHeightPx: 48,
                 firstItemPosition: new Point(660, 210),
-                itemFunc: async () =>
+                itemFunc: async (_, itemPosition) =>
                 {
+                    // Select item.
+                    dofusWindow.MouseClick(itemPosition);
                     var exchangeTypesItems = await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
                     await Task.Delay(TimeSpan.FromMilliseconds(500));
 
@@ -244,30 +251,36 @@ async Task<List<ItemPrice>> CollectAllItemPricesFromCurrentMapAuctionHouseAsync(
                             continue;
                         }
 
-                        itemPrices.Add(new ItemPrice((int)serverId, exchangeTypesItems.ObjectGid,
-                            (int)exchangeTypesItems.ObjectType, (int)buyerDescriptor.Quantities[i], price));
+                        metrics.WriteItemPrice(new ItemPrice((int)serverId, exchangeTypesItems.ObjectGid,
+                            (int)buyerDescriptor.Quantities[i], price));
                     }
+
+                    // Unselect item.
+                    dofusWindow.MouseClick(itemPosition);
+                    await Task.Delay(500);
                 });
+
+            // Unselect item type.
+            dofusWindow.MouseClick(itemTypePosition);
+            await Task.Delay(500);
         });
 
     dofusWindow.MouseClick(new Point(1203, 65)); // Close auction house
 
     LoggerProvider.CreateLogger<Program>()
-        .LogInformation("Collected {0} item prices from server {1} in {2} minutes",
-            itemPrices.Count, serverId, (int)sw.Elapsed.TotalMinutes);
-
-    return itemPrices;
+        .LogInformation("Collected item prices from server {0} in {2} minutes",
+            serverId, (int)sw.Elapsed.TotalMinutes);
 }
 
-async Task ClickAllItemFromScrollableListAsync(Window dofusWindow, int itemCount, int itemVisible, int itemPerScroll,
-    int itemLineHeightPx, Point firstItemPosition, Func<Task> itemFunc)
+async Task ScrollListAsync(Window dofusWindow, int itemCount, int itemVisible, int itemPerScroll,
+    int itemLineHeightPx, Point firstItemPosition, Func<int, Point, Task> itemFunc)
 {
     Point currentItemPos = firstItemPosition;
-    for (int itemTypeIdx = 0; itemTypeIdx < itemCount; itemTypeIdx += itemPerScroll)
+    for (int itemIdx = 0; itemIdx < itemCount; )
     {
-        int itemRemaining = itemCount - itemTypeIdx;
+        int itemRemaining = itemCount - itemIdx;
         int itemsToScan;
-        if (itemTypeIdx == 0) // First iteration.
+        if (itemIdx == 0) // First iteration.
         {
             itemsToScan = Math.Min(itemVisible, itemRemaining);
         }
@@ -283,24 +296,13 @@ async Task ClickAllItemFromScrollableListAsync(Window dofusWindow, int itemCount
 
         for (int j = 0; j < itemsToScan; j += 1)
         {
-            // Select item.
-            dofusWindow.MouseClick(currentItemPos);
-
-            await itemFunc();
-
-            // Unselect item.
-            dofusWindow.MouseClick(currentItemPos);
-            await Task.Delay(500);
+            await itemFunc(itemIdx, currentItemPos);
 
             currentItemPos.Y += itemLineHeightPx;
+            itemIdx += 1;
         }
 
         currentItemPos.Y -= itemPerScroll * itemLineHeightPx;
-        if (itemTypeIdx == 0)
-        {
-            itemTypeIdx += itemVisible - itemPerScroll;
-        }
-
         dofusWindow.MouseScroll(currentItemPos, -1);
     }
 }
@@ -326,43 +328,8 @@ Process RunAnkamaLauncher()
     })!;
 }
 
-Measurement<long>[] ConvertItemPricesToMeasurements(List<ItemPrice> itemPrices, DofusData data)
+IEnumerable<ItemPrice> ReadServersAverageItemPrices(DofusData data)
 {
-    var serversData = data.GetDataForType("Servers");
-    var itemsData = data.GetDataForType("Items");
-    var itemTypesData = data.GetDataForType("ItemTypes");
-
-    var measurements = new Measurement<long>[itemPrices.Count];
-    for (int i = 0; i < itemPrices.Count; i += 1)
-    {
-        var itemPrice = itemPrices[i];
-        var serverTextId = (int)serversData[itemPrice.ServerId]["nameId"]!;
-        var itemTextId = (int)itemsData[itemPrice.ObjectId]["nameId"]!;
-        var itemTypeTextId = (int)itemTypesData[itemPrice.ObjectTypeId]["nameId"]!;
-
-        measurements[i] = new Measurement<long>(itemPrice.Price, new KeyValuePair<string, object?>[]
-        {
-            new("server.id", itemPrice.ServerId),
-            new("server.name_fr", data.GetText(serverTextId, DofusLanguages.French)),
-            new("server.name_canonical_fr", data.GetUndiacriticText(serverTextId, DofusLanguages.French)),
-            new("item.id", itemPrice.ObjectId),
-            new("item.name_fr", data.GetText(itemTextId, DofusLanguages.French)),
-            new("item.name_canonical_fr", data.GetUndiacriticText(itemTextId, DofusLanguages.French)),
-            new("item.level", (int)itemsData[itemPrice.ObjectId]["level"]!),
-            new("item_type.id", itemPrice.ObjectTypeId),
-            new("item_type.name_fr", data.GetText(itemTypeTextId, DofusLanguages.French)),
-            new("item_type.name_canonical_fr", data.GetUndiacriticText(itemTypeTextId, DofusLanguages.French)),
-            new("quantity", itemPrice.Quantity),
-        });
-    }
-
-    return measurements;
-}
-
-Dictionary<string, Dictionary<int, long>> ReadServersAverageItemPrices()
-{
-    Dictionary<string, Dictionary<int, long>> serversPrices = new();
-
     var logger = LoggerProvider.CreateLogger<Program>();
 
     string itemAveragePricesPath = Path.Combine(
@@ -373,6 +340,11 @@ Dictionary<string, Dictionary<int, long>> ReadServersAverageItemPrices()
     foreach (KeyValuePair<string, object> server in root.DynamicMembersAndValues)
     {
         string serverName = server.Key;
+        if (!TryGetServerIdFromName(serverName, data, out int serverId))
+        {
+            continue;
+        }
+
         var serverData = ((Amf3Object)server.Value).DynamicMembersAndValues;
         var lastUpdate = (DateTime)serverData["lastUpdate"];
         var itemPrices = (Dictionary<object, object>)serverData["items"];
@@ -383,7 +355,6 @@ Dictionary<string, Dictionary<int, long>> ReadServersAverageItemPrices()
             continue;
         }
 
-        serversPrices[serverName] = new Dictionary<int, long>();
         foreach (var itemPrice in itemPrices)
         {
             int itemId = int.Parse((string)itemPrice.Key);
@@ -393,63 +364,11 @@ Dictionary<string, Dictionary<int, long>> ReadServersAverageItemPrices()
                 double p => (long)p,
                 _ => throw new Exception($"Unexpected type for price: {itemPrice.Value.GetType()}")
             };
-            serversPrices[serverName][itemId] = price;
+
+            yield return new ItemPrice(serverId, itemId, null, price);
         }
 
         logger.LogInformation($"server: '{serverName}', last update: {lastUpdate}, item prices: {itemPrices.Count}");
-    }
-
-    return serversPrices;
-}
-
-IEnumerable<Measurement<long>> ConvertServersItemPricesToMeasurements(
-    Dictionary<string, Dictionary<int, long>> serversPrices,
-    DofusData data)
-{
-    var serversData = data.GetDataForType("Servers");
-    var itemsData = data.GetDataForType("Items");
-    var itemTypesData = data.GetDataForType("ItemTypes");
-
-    foreach (var serverPrices in serversPrices)
-    {
-        if (!TryGetServerIdFromName(serverPrices.Key, data, out int serverId))
-        {
-            continue;
-        }
-
-        var serverData = serversData[serverId];
-        foreach (var itemPrice in serverPrices.Value)
-        {
-            int serverNameId = (int)serverData["nameId"]!;
-            string serverNameFr = data.GetText(serverNameId, DofusLanguages.French);
-            string serverNameCanonicalFr = data.GetUndiacriticText(serverNameId, DofusLanguages.French);
-
-            int itemId = itemPrice.Key;
-            int itemNameId = (int)itemsData[itemId]["nameId"]!;
-            string itemNameFr = data.GetText(itemNameId, DofusLanguages.French);
-            string itemNameCanonicalFr = data.GetUndiacriticText(itemNameId, DofusLanguages.French);
-
-            int itemLevel = (int)itemsData[itemId]["level"]!;
-
-            int itemTypeId = (int)itemsData[itemId]["typeId"]!;
-            int itemTypeNameId = (int)itemTypesData[itemTypeId]["nameId"]!;
-            string itemTypeNameFr = data.GetText(itemTypeNameId, DofusLanguages.French);
-            string itemTypeNameCanonicalFr = data.GetUndiacriticText(itemTypeNameId, DofusLanguages.French);
-
-            yield return new Measurement<long>(itemPrice.Value, new KeyValuePair<string, object?>[]
-            {
-                new("server.id", serverId),
-                new("server.name_fr", serverNameFr),
-                new("server.name_canonical_fr", serverNameCanonicalFr),
-                new("item.id", itemId),
-                new("item.name_fr", itemNameFr),
-                new("item.name_canonical_fr", itemNameCanonicalFr),
-                new("item.level", itemLevel),
-                new("item_type.id", itemTypeId),
-                new("item_type.name_fr", itemTypeNameFr),
-                new("item_type.name_canonical_fr", itemTypeNameCanonicalFr),
-            });
-        }
     }
 }
 
@@ -476,4 +395,4 @@ bool TryGetServerIdFromName(
     return false;
 }
 
-record ItemPrice(int ServerId, int ObjectId, int ObjectTypeId, int Quantity, long Price);
+record ItemPrice(int ServerId, int ItemId, int? Quantity, long Price);
