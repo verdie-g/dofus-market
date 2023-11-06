@@ -75,7 +75,8 @@ internal class DofusSniffer : IDisposable
 
         var loginServerIpAddresses = await Dns.GetHostAddressesAsync(DofusLoginServerHostName, cancellationToken);
 
-        _device.Open();
+        // Use MaxResponsiveness other it can take up to a second to receive a message.
+        _device.Open(DeviceModes.MaxResponsiveness);
         _device.Filter = $"tcp and (src port {DofusServersPort}) and (net {DofusGameServersIpRange} or host {string.Join<IPAddress>(" or host ", loginServerIpAddresses)})";
 
         Logger.LogInformation("Starting the sniffer filtering on \"{0}\"", _device.Filter);

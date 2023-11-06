@@ -106,11 +106,11 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
             // Dofus Character Selection
             var selectedServer = await messageReader.WaitForMessageAsync<SelectedServerDataMessage>();
             await messageReader.WaitForMessageAsync<CharactersListMessage>();
-            await Task.Delay(50);
+            await Task.Delay(500);
             dofusWindow.MouseClick(new Point(1256, 809), debugName: "Play");
 
             var mapInfo = await messageReader.WaitForMessageAsync<MapComplementaryInformationsDataMessage>();
-            await Task.Delay(1000);
+            await Task.Delay(1500);
 
             await CollectAllItemPricesFromCurrentMapAuctionHouseAsync(dofusWindow,
                 messageReader, selectedServer.ServerId, mapInfo.MapId, metrics);
@@ -230,7 +230,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
         {
             dofusWindow.MouseClick(itemTypePosition, debugName: "Select item type");
             var exchangeTypes = await messageReader.WaitForMessageAsync<ExchangeTypesExchangerDescriptionForUserMessage>();
-            await Task.Delay(TimeSpan.FromMilliseconds(1500));
+            await Task.Delay(TimeSpan.FromMilliseconds(1000));
 
             await ScrollListAsync(
                 dofusWindow,
@@ -239,11 +239,11 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                 itemPerScroll: 3,
                 itemLineHeightPx: 48,
                 firstItemPosition: new Point(660, 210),
-                itemFunc: async (_, itemPosition) =>
+                itemFunc: async (itemIndex, itemPosition) =>
                 {
-                    dofusWindow.MouseClick(itemPosition, debugName: "Select item");
+                    dofusWindow.MouseClick(itemPosition, debugName: "Select item at index " + itemIndex);
                     var exchangeTypesItems = await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
-                    await Task.Delay(TimeSpan.FromMilliseconds(500));
+                    await Task.Delay(TimeSpan.FromMilliseconds(200));
 
                     for (int i = 0; i < buyerDescriptor.Quantities.Length; i += 1)
                     {
@@ -261,13 +261,13 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                             (int)buyerDescriptor.Quantities[i], price));
                     }
 
-                    dofusWindow.MouseClick(itemPosition, debugName: "Unselect item");
-                    await Task.Delay(500);
+                    dofusWindow.MouseClick(itemPosition, debugName: "Unselect item at index " + itemIndex);
                     await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
+                    await Task.Delay(TimeSpan.FromMilliseconds(400));
                 });
 
             dofusWindow.MouseClick(itemTypePosition, debugName: "Unselect item type");
-            await Task.Delay(500);
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
         });
 
     dofusWindow.MouseClick(new Point(1203, 65), debugName: "Close auction house");
@@ -309,7 +309,7 @@ async Task ScrollListAsync(Window dofusWindow, int itemCount, int itemVisible, i
 
         currentItemPos.Y -= itemPerScroll * itemLineHeightPx;
         dofusWindow.MouseScroll(currentItemPos, -1);
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(200));
     }
 }
 

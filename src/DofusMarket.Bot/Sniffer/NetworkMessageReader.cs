@@ -1,4 +1,5 @@
-﻿using DofusMarket.Bot.Logging;
+﻿using System.Diagnostics;
+using DofusMarket.Bot.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace DofusMarket.Bot.Sniffer;
@@ -16,8 +17,7 @@ internal class NetworkMessageReader
 
     public async ValueTask<T> WaitForMessageAsync<T>() where T : INetworkMessage
     {
-        Logger.LogDebug($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>()");
-
+        var sw = Stopwatch.StartNew();
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
 
         do
@@ -28,6 +28,7 @@ internal class NetworkMessageReader
             }
         } while (_messageEnumerator.Current is not T);
 
+        Logger.LogDebug($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>() -> {sw.ElapsedMilliseconds} ms");
         return (T)_messageEnumerator.Current;
     }
 }
