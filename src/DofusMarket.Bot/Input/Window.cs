@@ -111,11 +111,14 @@ internal class Window
     {
         Logger.LogDebug($"{nameof(Window)}.{nameof(MouseClick)}({point}, {clickCount})");
 
-        foreach (var msgType in new[] { PInvoke.WM_LBUTTONDOWN, PInvoke.WM_LBUTTONUP })
+        for (int i = 0; i < clickCount; i += 1)
         {
-            var res = PInvoke.SendMessage(_handle, msgType, (nuint)MODIFIERKEYS_FLAGS.MK_LBUTTON,
-                PointToLParam(point));
-            Win32Helper.ThrowIfFalse(res == 0, nameof(PInvoke.SendMessage), false);
+            foreach (var msgType in new[] { PInvoke.WM_LBUTTONDOWN, PInvoke.WM_LBUTTONUP })
+            {
+                var res = PInvoke.SendMessage(_handle, msgType, (nuint)MODIFIERKEYS_FLAGS.MK_LBUTTON,
+                    PointToLParam(point));
+                Win32Helper.ThrowIfFalse(res == 0, nameof(PInvoke.SendMessage), false);
+            }
         }
     }
 
