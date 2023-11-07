@@ -3,6 +3,7 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading.Channels;
 using DofusMarket.Bot.Logging;
 using DofusMarket.Bot.Serialization;
@@ -25,7 +26,8 @@ internal class DofusSniffer : IDisposable
     private static readonly ILogger Logger = LoggerProvider.CreateLogger<DofusSniffer>();
 
     private readonly string _networkDeviceId;
-    private readonly Pipe _tcpPipe;
+    private readonly Pipe _incomingTcpPipe;
+    private readonly Pipe _outgoingTcpPipe;
     private readonly CancellationTokenSource _tcpPipeCancellation;
     private readonly Channel<INetworkMessage> _messagesChannel;
     private ILiveDevice? _device;
@@ -33,7 +35,8 @@ internal class DofusSniffer : IDisposable
     public DofusSniffer(string networkDeviceId)
     {
         _networkDeviceId = networkDeviceId;
-        _tcpPipe = new Pipe();
+        _incomingTcpPipe = new Pipe();
+        _outgoingTcpPipe = new Pipe();
         _tcpPipeCancellation = new CancellationTokenSource();
         _messagesChannel = Channel.CreateUnbounded<INetworkMessage>(new UnboundedChannelOptions
         {
@@ -54,8 +57,9 @@ internal class DofusSniffer : IDisposable
             throw new Exception($"No device found with id '{_networkDeviceId}'. Available devices: {availableDevices}");
         }
 
-        Task.Run(() => FillPipeAsync(_tcpPipeCancellation.Token));
-        Task.Run(() => ReadPipeAsync(_tcpPipeCancellation.Token));
+        Task.Run(() => FillPipesAsync(_tcpPipeCancellation.Token));
+        Task.Run(() => ReadPipeAsync(_incomingTcpPipe.Reader, NetworkPacketDirection.Incoming, _tcpPipeCancellation.Token));
+        Task.Run(() => ReadPipeAsync(_outgoingTcpPipe.Reader, NetworkPacketDirection.Outgoing, _tcpPipeCancellation.Token));
 
         return this;
     }
@@ -69,7 +73,7 @@ internal class DofusSniffer : IDisposable
         }
     }
 
-    private async Task FillPipeAsync(CancellationToken cancellationToken)
+    private async Task FillPipesAsync(CancellationToken cancellationToken)
     {
         Debug.Assert(_device != null);
 
@@ -77,27 +81,31 @@ internal class DofusSniffer : IDisposable
 
         // Use MaxResponsiveness other it can take up to a second to receive a message.
         _device.Open(DeviceModes.MaxResponsiveness);
-        _device.Filter = $"tcp and (src port {DofusServersPort}) and (net {DofusGameServersIpRange} or host {string.Join<IPAddress>(" or host ", loginServerIpAddresses)})";
+        _device.Filter = $"tcp and (port {DofusServersPort}) and (net {DofusGameServersIpRange} or host {string.Join<IPAddress>(" or host ", loginServerIpAddresses)})";
 
         Logger.LogInformation("Starting the sniffer filtering on \"{0}\"", _device.Filter);
 
-        var pipeWriter = _tcpPipe.Writer;
+        var incomingTcpPipeWriter = _incomingTcpPipe.Writer;
+        var outgoingTcpPipeWriter = _outgoingTcpPipe.Writer;
         GetPacketStatus packetStatus;
         do
         {
-            packetStatus = GetNextTcpPacketPayload(out byte[] tcpPayload);
+            packetStatus = GetNextTcpPacketPayload(out byte[] tcpPayload, out var packetDirection);
             if (packetStatus == GetPacketStatus.PacketRead)
             {
-                await pipeWriter.WriteAsync(tcpPayload, cancellationToken);
+                await (packetDirection == NetworkPacketDirection.Incoming
+                    ? incomingTcpPipeWriter.WriteAsync(tcpPayload, cancellationToken)
+                    : outgoingTcpPipeWriter.WriteAsync(tcpPayload, cancellationToken));
             }
         } while (packetStatus is GetPacketStatus.PacketRead or GetPacketStatus.ReadTimeout);
 
         Logger.LogError("Error reading packet. Shutting down the sniffer");
 
-        await pipeWriter.CompleteAsync();
+        await incomingTcpPipeWriter.CompleteAsync();
+        await outgoingTcpPipeWriter.CompleteAsync();
     }
 
-    private GetPacketStatus GetNextTcpPacketPayload(out byte[] tcpPayload)
+    private GetPacketStatus GetNextTcpPacketPayload(out byte[] tcpPayload, out NetworkPacketDirection packetDirection)
     {
         Debug.Assert(_device != null);
 
@@ -105,20 +113,27 @@ internal class DofusSniffer : IDisposable
         if (packetStatus != GetPacketStatus.PacketRead)
         {
             tcpPayload = Array.Empty<byte>();
+            packetDirection = default;
             return packetStatus;
         }
 
         var rawPacket = e.GetPacket();
         var packet = Packet.ParsePacket(rawPacket.LinkLayerType, rawPacket.Data);
 
+        var ipPacket = packet.Extract<IPPacket>();
+        packetDirection = ipPacket.DestinationAddress.AddressFamily == AddressFamily.InterNetwork
+                          && ipPacket.DestinationAddress.GetAddressBytes()[0] == 10
+            ? NetworkPacketDirection.Incoming
+            : NetworkPacketDirection.Outgoing;
+
         var tcpPacket = packet.Extract<TcpPacket>();
         tcpPayload = tcpPacket.PayloadData;
+
         return packetStatus;
     }
 
-    private async Task ReadPipeAsync(CancellationToken cancellationToken)
+    private async Task ReadPipeAsync(PipeReader pipeReader, NetworkPacketDirection packetDirection, CancellationToken cancellationToken)
     {
-        var pipeReader = _tcpPipe.Reader;
         while (true)
         {
             ReadResult result = await pipeReader.ReadAsync(cancellationToken);
@@ -127,7 +142,7 @@ internal class DofusSniffer : IDisposable
             SequencePosition consumed;
             try
             {
-                consumed = ReadAndHandleMessages(in buffer);
+                consumed = ReadAndHandleMessages(in buffer, packetDirection);
             }
             catch (Exception e)
             {
@@ -146,20 +161,22 @@ internal class DofusSniffer : IDisposable
         await pipeReader.CompleteAsync();
     }
 
-    private SequencePosition ReadAndHandleMessages(in ReadOnlySequence<byte> sequence)
+    private SequencePosition ReadAndHandleMessages(in ReadOnlySequence<byte> sequence,
+        NetworkPacketDirection packetDirection)
     {
         SequenceReader<byte> sequenceReader = new(sequence);
         SequencePosition consumed = sequenceReader.Position;
-        while (!sequenceReader.End && TryReadMessage(ref sequenceReader, out RawNetworkMessage message))
+        while (!sequenceReader.End && TryReadMessage(ref sequenceReader, packetDirection, out RawNetworkMessage message))
         {
-            HandleMessage(message);
+            HandleMessage(message, packetDirection);
             consumed = sequenceReader.Position;
         }
 
         return consumed;
     }
 
-    private bool TryReadMessage(ref SequenceReader<byte> sequenceReader, out RawNetworkMessage rawMessage)
+    private bool TryReadMessage(ref SequenceReader<byte> sequenceReader, NetworkPacketDirection packetDirection,
+        out RawNetworkMessage rawMessage)
     {
         if (!sequenceReader.TryReadBigEndian(out short messageHeader))
         {
@@ -168,6 +185,14 @@ internal class DofusSniffer : IDisposable
         }
 
         ushort messageId = GetMessageId(messageHeader);
+
+        if (packetDirection == NetworkPacketDirection.Outgoing
+            && !sequenceReader.TryReadBigEndian(out int sequenceId))
+        {
+            rawMessage = default;
+            return false;
+        }
+
         if (!ReadMessageLength(ref sequenceReader, messageHeader, out int messageLength))
         {
             rawMessage = default;
@@ -210,15 +235,19 @@ internal class DofusSniffer : IDisposable
         return true;
     }
 
-    private void HandleMessage(RawNetworkMessage rawMessage)
+    private void HandleMessage(RawNetworkMessage rawMessage, NetworkPacketDirection packetDirection)
     {
         if (!NetworkMessageRegistry.TryGetTypeFromId(rawMessage.Id, out Type? messageType))
         {
-            Logger.LogDebug("Ignoring unknown message of {0} bytes with id '{1}'", rawMessage.Content.Length, rawMessage.Id);
+            Logger.LogDebug("{0} unknown message of {1} bytes with id '{2}'",
+                (packetDirection == NetworkPacketDirection.Incoming ? "Received" : "Sent"),
+                rawMessage.Content.Length, rawMessage.Id);
             return;
         }
 
-        Logger.LogDebug("Received message {0}", messageType.Name);
+        Logger.LogDebug("{0} message {1}",
+            (packetDirection == NetworkPacketDirection.Incoming ? "Received" : "Sent"),
+            messageType.Name);
         var message = (INetworkMessage)Activator.CreateInstance(messageType)!;
         try
         {
@@ -233,9 +262,14 @@ internal class DofusSniffer : IDisposable
             return;
         }
 
-        bool written = _messagesChannel.Writer.TryWrite(message);
-        Debug.Assert(written);
+        if (packetDirection == NetworkPacketDirection.Incoming)
+        {
+            bool written = _messagesChannel.Writer.TryWrite(message);
+            Debug.Assert(written);
+        }
     }
 
     private record struct RawNetworkMessage(ushort Id, ReadOnlySequence<byte> Content);
+
+    private enum NetworkPacketDirection { Incoming, Outgoing }
 }
