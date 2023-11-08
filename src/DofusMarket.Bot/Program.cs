@@ -34,13 +34,14 @@ while (true)
         var dofusData = DofusData.New(dofusPath, new[] { "Servers", "Items", "ItemTypes" });
         DofusMarketMetrics metrics = new(dofusData);
 
+        metrics.WriteItemAveragePrices(ReadServersAverageItemPrices(dofusData));
+
         var sw = Stopwatch.StartNew();
         await CollectAllServerItemPricesAsync(metrics);
         LoggerProvider.CreateLogger<Program>().LogInformation("Collected item prices from all servers {1} minutes",
             (int)sw.Elapsed.TotalMinutes);
 
-        var itemAveragePrices = ReadServersAverageItemPrices(dofusData);
-        metrics.WriteItemAveragePrices(itemAveragePrices);
+        metrics.WriteItemAveragePrices(ReadServersAverageItemPrices(dofusData));
     }
     catch (Exception e)
     {
