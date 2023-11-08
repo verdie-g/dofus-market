@@ -20,15 +20,22 @@ internal class NetworkMessageReader
         var sw = Stopwatch.StartNew();
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
 
-        do
+        try
         {
-            if (!await _messageEnumerator.MoveNextAsync().AsTask().WaitAsync(cts.Token))
+            do
             {
-                throw new InvalidOperationException("No more messages");
-            }
-        } while (_messageEnumerator.Current is not T);
+                if (!await _messageEnumerator.MoveNextAsync().AsTask().WaitAsync(cts.Token))
+                {
+                    throw new InvalidOperationException("No more messages");
+                }
+            } while (_messageEnumerator.Current is not T);
+        }
+        finally
+        {
+            Logger.LogDebug($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>()" +
+                            $" -> {sw.ElapsedMilliseconds} ms" + (cts.IsCancellationRequested ? " (TIMEOUT)" : ""));
+        }
 
-        Logger.LogDebug($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>() -> {sw.ElapsedMilliseconds} ms");
         return (T)_messageEnumerator.Current;
     }
 }
