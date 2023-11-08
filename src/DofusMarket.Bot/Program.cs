@@ -128,6 +128,8 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
             await messageReader.WaitForMessageAsync<ServerListMessage>();
             await Task.Delay(250);
         });
+
+    KillAll("dofus");
 }
 
 void RunDofus(string ankamaLogin, string ankamaPassword)
