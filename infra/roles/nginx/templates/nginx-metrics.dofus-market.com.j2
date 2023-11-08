@@ -5,9 +5,7 @@ server {
 
     include /etc/nginx/snippets/dofus-market-ssl.conf;
 
-    # Close slow connections.
-    client_body_timeout 5s;
-    client_header_timeout 5s;
+    client_body_buffer_size 4M;
 
     auth_basic "Metrics";
     auth_basic_user_file htpasswd/{{ dofus_market_metrics_domain_name }};
