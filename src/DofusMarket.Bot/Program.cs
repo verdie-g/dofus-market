@@ -280,7 +280,23 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                     }
 
                     dofusWindow.MouseClick(itemPosition, debugName: "Unselect item at index " + itemIndex);
-                    await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>();
+                    search = await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>();
+                    // Unselecting is supposed to send a request if Follow=false but sometimes it's true and the item
+                    // doesn't collapse. It looks like a bug in the client. Anyway, just retry the click when that occurs.
+                    if (search.Follow)
+                    {
+                        logger.LogWarning($"Sent {nameof(ExchangeBidHouseSearchMessage)} with {nameof(ExchangeBidHouseSearchMessage.Follow)}=true"
+                            + " when trying to unselect. Retrying the unselect");
+                        dofusWindow.MouseClick(itemPosition, debugName: "Unselect again item at index " + itemIndex);
+                        search = await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>();
+                        if (search.Follow)
+                        {
+                            throw new Exception(
+                                $"Sent {nameof(ExchangeBidHouseSearchMessage)} with {nameof(ExchangeBidHouseSearchMessage.Follow)}=true"
+                                + " when trying to unselect");
+                        }
+                    }
+
                     await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
                     await Task.Delay(TimeSpan.FromMilliseconds(400));
                 });
