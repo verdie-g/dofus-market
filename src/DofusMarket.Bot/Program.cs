@@ -23,6 +23,7 @@ var loggerFactory = LoggerFactory.Create(builder =>
 });
 LoggerProvider.Initialize(loggerFactory);
 
+var l = LoggerProvider.CreateLogger<Program>();
 while (true)
 {
     try
@@ -38,17 +39,19 @@ while (true)
 
         var sw = Stopwatch.StartNew();
         await CollectAllServerItemPricesAsync(metrics);
-        LoggerProvider.CreateLogger<Program>().LogInformation("Collected item prices from all servers {1} minutes",
+        l.LogInformation("Collected item prices from all servers {1} minutes",
             (int)sw.Elapsed.TotalMinutes);
 
         metrics.WriteItemAveragePrices(ReadServersAverageItemPrices(dofusData));
     }
     catch (Exception e)
     {
-        LoggerProvider.CreateLogger<Program>().LogError(e, "An error occured while collecting prices");
+        l.LogError(e, "An error occured while collecting prices");
     }
 
-    await Task.Delay(TimeSpan.FromHours(10));
+    var delay = TimeSpan.FromHours(6);
+    l.LogInformation($"Waiting {delay} for next run");
+    await Task.Delay(delay);
 }
 
 async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
