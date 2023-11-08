@@ -122,6 +122,7 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
             dofusWindow.MouseClick(new Point(875, 551), debugName: "Confirm");
 
             await messageReader.WaitForMessageAsync<ServerListMessage>();
+            await Task.Delay(250);
         });
 }
 
@@ -205,6 +206,7 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
 async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindow,
     NetworkMessageReader messageReader, uint serverId, long mapId, DofusMarketMetrics metrics)
 {
+    var logger = LoggerProvider.CreateLogger<Program>();
     var sw = Stopwatch.StartNew();
 
     var auctionHousePos = mapId switch
@@ -242,7 +244,23 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                 itemFunc: async (itemIndex, itemPosition) =>
                 {
                     dofusWindow.MouseClick(itemPosition, debugName: "Select item at index " + itemIndex);
+                    var search = await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>();
+
                     var exchangeTypesItems = await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
+                    if (exchangeTypesItems.ObjectGid != search.ObjectGid)
+                    {
+                        logger.LogWarning($"Received {nameof(ExchangeTypesItemsExchangerDescriptionForUserMessage)}"
+                                          + $" with item id {exchangeTypesItems.ObjectGid} but expected {search.ObjectGid}."
+                                          + $" Skipping this message hoping it was just a duplicate response from the last request");
+
+                        exchangeTypesItems = await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
+                        if (exchangeTypesItems.ObjectGid != search.ObjectGid)
+                        {
+                            throw new Exception($"Received {nameof(ExchangeTypesItemsExchangerDescriptionForUserMessage)}"
+                                                + $" with item id {exchangeTypesItems.ObjectGid} but expected {search.ObjectGid}.");
+                        }
+                    }
+
                     await Task.Delay(TimeSpan.FromMilliseconds(200));
 
                     for (int i = 0; i < buyerDescriptor.Quantities.Length; i += 1)
@@ -262,6 +280,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                     }
 
                     dofusWindow.MouseClick(itemPosition, debugName: "Unselect item at index " + itemIndex);
+                    await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>();
                     await messageReader.WaitForMessageAsync<ExchangeTypesItemsExchangerDescriptionForUserMessage>();
                     await Task.Delay(TimeSpan.FromMilliseconds(400));
                 });
@@ -272,9 +291,8 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
 
     dofusWindow.MouseClick(new Point(1203, 65), debugName: "Close auction house");
 
-    LoggerProvider.CreateLogger<Program>()
-        .LogInformation("Collected item prices from server {0} in {1} minutes",
-            serverId, (int)sw.Elapsed.TotalMinutes);
+    logger.LogInformation("Collected item prices from server {0} in {1} minutes", serverId,
+        (int)sw.Elapsed.TotalMinutes);
 }
 
 async Task ScrollListAsync(Window dofusWindow, int itemCount, int itemVisible, int itemPerScroll,

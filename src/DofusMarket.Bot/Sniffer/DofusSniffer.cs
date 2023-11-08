@@ -240,14 +240,11 @@ internal class DofusSniffer : IDisposable
         if (!NetworkMessageRegistry.TryGetTypeFromId(rawMessage.Id, out Type? messageType))
         {
             Logger.LogDebug("{0} unknown message of {1} bytes with id '{2}'",
-                (packetDirection == NetworkPacketDirection.Incoming ? "Received" : "Sent"),
+                packetDirection == NetworkPacketDirection.Incoming ? "Received" : "Sent",
                 rawMessage.Content.Length, rawMessage.Id);
             return;
         }
 
-        Logger.LogDebug("{0} message {1}",
-            (packetDirection == NetworkPacketDirection.Incoming ? "Received" : "Sent"),
-            messageType.Name);
         var message = (INetworkMessage)Activator.CreateInstance(messageType)!;
         try
         {
@@ -261,12 +258,12 @@ internal class DofusSniffer : IDisposable
             Logger.LogError(e, "An error occured deserializing message {0}", messageType.Name);
             return;
         }
+        Logger.LogDebug("{0} message {1}",
+            packetDirection == NetworkPacketDirection.Incoming ? "Received" : "Sent",
+            message);
 
-        if (packetDirection == NetworkPacketDirection.Incoming)
-        {
-            bool written = _messagesChannel.Writer.TryWrite(message);
-            Debug.Assert(written);
-        }
+        bool written = _messagesChannel.Writer.TryWrite(message);
+        Debug.Assert(written);
     }
 
     private record struct RawNetworkMessage(ushort Id, ReadOnlySequence<byte> Content);
