@@ -284,6 +284,7 @@ async Task CollectAllItemPricesFromCurrentMapAuctionHouseAsync(Window dofusWindo
                     {
                         logger.LogWarning($"Sent {nameof(ExchangeBidHouseSearchMessage)} with {nameof(ExchangeBidHouseSearchMessage.Follow)}=true"
                             + " when trying to unselect. Retrying the unselect");
+                        await Task.Delay(TimeSpan.FromMilliseconds(500));
                         dofusWindow.MouseClick(itemPosition, debugName: "Unselect again item at index " + itemIndex);
                         search = await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>();
                         if (search.Follow)
