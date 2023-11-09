@@ -2,4 +2,4 @@
 
 grafana_port: 3000
 mimir_port: 4000
-minio_port: 5000
+loki_port: 5000

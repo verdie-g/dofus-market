@@ -1,0 +1,17 @@
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name {{ dofus_market_logs_domain_name }};
+
+    include /etc/nginx/snippets/dofus-market-ssl.conf;
+
+    client_body_buffer_size 4M;
+
+    auth_basic "Logs";
+    auth_basic_user_file htpasswd/{{ dofus_market_logs_domain_name }};
+
+    location / {
+      proxy_set_header Host $http_host;
+      proxy_pass http://localhost:{{ loki_port }};
+    }
+}

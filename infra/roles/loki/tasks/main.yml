@@ -1,0 +1,40 @@
+---
+- name: create loki configuration directory
+  file:
+    path: /opt/loki
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: create loki configuration file
+  template:
+    src: loki.yml.j2
+    dest: /opt/loki/loki.yml
+    mode: 0644
+
+- name: create loki data directory
+  file:
+    path: /opt/loki/data
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: start container
+  docker_container:
+    name: loki
+    image: grafana/loki
+    state: started
+    restart: true
+    command: "-config.file=/etc/loki.yml"
+    user: root
+    ports:
+      - "{{ loki_port }}:{{ loki_port }}"
+    volumes:
+      - "/opt/loki/loki.yml:/etc/loki.yml:ro"
+      - "/opt/loki/data:/data:rw"
+    networks:
+      - name: grafana-net
+    comparisons:
+      '*': strict

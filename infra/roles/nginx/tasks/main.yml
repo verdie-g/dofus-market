@@ -8,6 +8,14 @@
     owner: root
     group: root
 
+- name: create nginx sites directory
+  file:
+    path: /opt/nginx/sites-enabled
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
 - name: create nginx configuration file
   template:
     src: nginx.conf.j2
@@ -27,13 +35,14 @@
 - name: create virtual server configuration file
   template:
     src: "nginx-{{ item }}.j2"
-    dest: "/opt/nginx/{{ item }}"
+    dest: "/opt/nginx/sites-enabled/{{ item }}"
     mode: 0644
     owner: root
     group: root
   with_items:
     - "{{ dofus_market_domain_name }}"
     - "{{ dofus_market_metrics_domain_name }}"
+    - "{{ dofus_market_logs_domain_name }}"
 
 - name: install python passlib
   apt:
@@ -41,14 +50,21 @@
     state: present
     update_cache: yes
 
-- name: create htpasswd for the metrics domain
+- name: create htpasswd
   htpasswd:
-    path: /opt/nginx/passwd-metrics
-    name: "{{ dofus_market_metrics_basic_auth_name }}"
-    password: "{{ dofus_market_metrics_basic_auth_password }}"
+    path: "/opt/nginx/htpasswd/{{ item.path }}"
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
     mode: 0644
     owner: root
     group: root
+  with_items:
+    - path: "{{ dofus_market_metrics_domain_name }}"
+      name: "{{ dofus_market_metrics_basic_auth_name }}"
+      password: "{{ dofus_market_metrics_basic_auth_password }}"
+    - path: "{{ dofus_market_logs_domain_name }}"
+      name: "{{ dofus_market_logs_basic_auth_name }}"
+      password: "{{ dofus_market_logs_basic_auth_password }}"
 
 - name: start container
   docker_container:
@@ -59,10 +75,9 @@
     network_mode: host
     volumes:
       - "/opt/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "/opt/nginx/{{ dofus_market_domain_name }}:/etc/nginx/sites-enabled/{{ dofus_market_domain_name }}:ro"
-      - "/opt/nginx/{{ dofus_market_metrics_domain_name }}:/etc/nginx/sites-enabled/{{ dofus_market_metrics_domain_name }}:ro"
+      - "/opt/nginx/sites-enabled:/etc/nginx/sites-enabled:ro"
       - "/opt/nginx/dofus-market-ssl.conf:/etc/nginx/snippets/dofus-market-ssl.conf:ro"
-      - "/opt/nginx/passwd-metrics:/etc/nginx/htpasswd/{{ dofus_market_metrics_domain_name }}:ro"
+      - "/opt/nginx/htpasswd:/etc/nginx/htpasswd:ro"
       - "/opt/certbot/www:/var/www/certbot:ro"
       - "/opt/certbot/letsencrypt:/etc/letsencrypt:ro"
 

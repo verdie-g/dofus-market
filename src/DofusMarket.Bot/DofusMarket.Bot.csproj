@@ -19,6 +19,9 @@
     </PackageReference>
     <PackageReference Include="mtanksl.ActionMessageFormat" Version="1.0.4" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.6.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+    <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.2.0" />
     <PackageReference Include="SharpPcap" Version="6.2.5" />
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>

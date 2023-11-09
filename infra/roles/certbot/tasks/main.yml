@@ -29,7 +29,7 @@
     name: certbot
     image: certbot/certbot
     state: started
-    command: "certonly --non-interactive -m {{ certbot_email }} --agree-tos --webroot --webroot-path /var/www/certbot --cert-name {{ dofus_market_domain_name }} -d {{ dofus_market_domain_name }},{{ dofus_market_domain_name_www }},{{ dofus_market_metrics_domain_name }}"
+    command: "certonly --non-interactive -m {{ certbot_email }} --agree-tos --webroot --webroot-path /var/www/certbot --cert-name {{ dofus_market_domain_name }} -d {{ dofus_market_domain_name }},{{ dofus_market_domain_name_www }},{{ dofus_market_metrics_domain_name }},{{ dofus_market_logs_domain_name }}"
     volumes:
       - "/opt/certbot/www:/var/www/certbot:rw"
       - "/opt/certbot/letsencrypt:/etc/letsencrypt:rw"

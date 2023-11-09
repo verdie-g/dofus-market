@@ -9,19 +9,10 @@ using DofusMarket.Bot.Sniffer.Messages;
 using DofusMarket.Bot.Sniffer.Types;
 using Microsoft.Extensions.Logging;
 using mtanksl.ActionMessageFormat;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 
-var loggerFactory = LoggerFactory.Create(builder =>
-{
-    builder
-        .AddSimpleConsole(options =>
-        {
-            options.SingleLine = true;
-            options.TimestampFormat = "HH:mm:ss.ffff ";
-            options.UseUtcTimestamp = true;
-        })
-        .SetMinimumLevel(LogLevel.Debug);
-});
-LoggerProvider.Initialize(loggerFactory);
+InitializeLogging();
 
 var l = LoggerProvider.CreateLogger<Program>();
 while (true)
@@ -439,6 +430,35 @@ bool TryGetServerIdFromName(
 
     serverId = default;
     return false;
+}
+
+void InitializeLogging()
+{
+    string? name = Environment.GetEnvironmentVariable("DOFUS_MARKET_LOGS_BASIC_AUTH_NAME");
+    string? password = Environment.GetEnvironmentVariable("DOFUS_MARKET_LOGS_BASIC_AUTH_PASSWORD");
+
+    var serilogConfiguration = new LoggerConfiguration()
+        .MinimumLevel.Debug()
+        .WriteTo.Console();
+
+    if (name != null && password != null)
+    {
+        serilogConfiguration
+            .WriteTo.GrafanaLoki(
+                uri: "https://logs.dofus-market.com",
+                labels: new [] { new LokiLabel { Key = "app", Value = "dofus-market-bot" } },
+                credentials: new LokiCredentials { Login = name, Password = password });
+    }
+
+    Log.Logger = serilogConfiguration.CreateLogger();
+
+    var loggerFactory = LoggerFactory.Create(builder =>
+    {
+        builder
+            .AddSerilog(dispose: true)
+            .SetMinimumLevel(LogLevel.Debug);
+    });
+    LoggerProvider.Initialize(loggerFactory);
 }
 
 record ItemPrice(int ServerId, int ItemId, int? Quantity, long Price);

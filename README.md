@@ -8,7 +8,7 @@ detect. The code is still available in the [bot-socket branch](https://github.co
 
 This bot is sniffing packets from the Dofus servers using [npcap](https://npcap.com) and injects user
 inputs to the Dofus window using [win32's winuser.h](https://learn.microsoft.com/en-us/windows/win32/api/winuser).
-Packets containing item prices are sent to a Grafana stack (Grafana, Mimir, ...) at [dofus-market.com](https://dofus-market.com).
+Packets containing item prices are sent to a Grafana stack (Grafana, Mimir, Loki) at [dofus-market.com](https://dofus-market.com).
 
 The problem is that there are tens of thousands of items and ~ten Dofus server so I believe sending a million of packet
 a day will quickly get it ban for failing the behavioral tests from Ankama. On top of that, Ankama just announced that
