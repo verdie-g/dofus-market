@@ -23,3 +23,10 @@ schema_config:
       index:
         prefix: index_
         period: 24h
+
+compactor:
+  working_directory: /data/retention
+  retention_enabled: true
+
+limits_config:
+  retention_period: 336h

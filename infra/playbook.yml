@@ -1,8 +1,9 @@
 - hosts: monitoring
   become: yes
   roles:
-    # - docker
+    - docker
     - grafana
     - mimir
-    # - certbot
+    - loki
+    - certbot
     - nginx
