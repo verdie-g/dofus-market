@@ -47,6 +47,8 @@ while (true)
 
 async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
 {
+    var logger = LoggerProvider.CreateLogger<Program>();
+
     RunDofus(
         Environment.GetEnvironmentVariable("ANKAMA_LOGIN")!,
         Environment.GetEnvironmentVariable("ANKAMA_PASSWORD")!);
@@ -92,6 +94,11 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
             {
                 return;
             }
+
+            using var serverLoggingScope = logger.BeginScope(new KeyValuePair<string, object>[]
+            {
+                new("server.id", servers[serverIdx]!.Id),
+            });
 
             await Task.Delay(50);
             dofusWindow.MouseClick(new Point(739, 178), debugName: "Order servers by name");
