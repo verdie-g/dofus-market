@@ -13,6 +13,7 @@
     image: grafana/grafana-enterprise
     state: started
     restart: true
+    restart_policy: unless-stopped
     ports:
       - "{{ grafana_port }}:{{ grafana_port }}"
     volumes:

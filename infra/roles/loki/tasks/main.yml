@@ -27,6 +27,7 @@
     image: grafana/loki
     state: started
     restart: true
+    restart_policy: unless-stopped
     command: "-config.file=/etc/loki.yml"
     user: root
     ports:

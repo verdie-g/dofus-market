@@ -26,6 +26,7 @@
     name: mimir
     image: grafana/mimir
     state: started
+    restart_policy: unless-stopped
     restart: true
     command: "-config.file=/etc/mimir.yml"
     ports:
