@@ -15,10 +15,10 @@ internal class NetworkMessageReader
         _messageEnumerator = sniffer.Messages.GetAsyncEnumerator();
     }
 
-    public async ValueTask<T> WaitForMessageAsync<T>() where T : INetworkMessage
+    public async ValueTask<T> WaitForMessageAsync<T>(TimeSpan timeout = default) where T : INetworkMessage
     {
         var sw = Stopwatch.StartNew();
-        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
+        using CancellationTokenSource cts = new(timeout == default ? TimeSpan.FromSeconds(30) : timeout);
 
         try
         {
