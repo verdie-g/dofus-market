@@ -208,6 +208,9 @@ void RunDofus(string ankamaLogin, string ankamaPassword)
     // Ankama Launcher Dofus
     ankamaLauncherWindow.WaitForPixel(new Point(386, 424), ColorTranslator.FromHtml("#FFFFFF"), TimeSpan.FromMinutes(5)); // Play button
 #endif
+    // If an ankama launcher update is required it will restart the launcher which will make the current run fail
+    // but it's ok.
+    ankamaLauncherWindow.MouseClick(new Point(962, 551), debugName: "Update");
     ankamaLauncherWindow.MouseClick(new Point(386, 424), debugName: "Play");
 }
 
