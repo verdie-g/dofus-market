@@ -46,7 +46,7 @@ internal class DofusSniffer : IDisposable
         });
     }
 
-    public IAsyncEnumerable<INetworkMessage> Messages => _messagesChannel.Reader.ReadAllAsync();
+    public ChannelReader<INetworkMessage> Messages => _messagesChannel.Reader;
 
     public DofusSniffer Start()
     {

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Channels;
 using DofusMarket.Bot.Logging;
 using Microsoft.Extensions.Logging;
 
@@ -8,34 +9,33 @@ internal class NetworkMessageReader
 {
     private static readonly ILogger Logger = LoggerProvider.CreateLogger<NetworkMessageReader>();
 
-    private readonly IAsyncEnumerator<INetworkMessage> _messageEnumerator;
+    private readonly ChannelReader<INetworkMessage> _messageChan;
 
     public NetworkMessageReader(DofusSniffer sniffer)
     {
-        _messageEnumerator = sniffer.Messages.GetAsyncEnumerator();
+        _messageChan = sniffer.Messages;
     }
 
     public async ValueTask<T> WaitForMessageAsync<T>(TimeSpan timeout = default) where T : INetworkMessage
     {
         var sw = Stopwatch.StartNew();
-        using CancellationTokenSource cts = new(timeout == default ? TimeSpan.FromSeconds(30) : timeout);
+        using CancellationTokenSource cancellation = new(timeout == default ? TimeSpan.FromSeconds(30) : timeout);
 
+        INetworkMessage message;
         try
         {
             do
             {
-                if (!await _messageEnumerator.MoveNextAsync().AsTask().WaitAsync(cts.Token))
-                {
-                    throw new InvalidOperationException("No more messages");
-                }
-            } while (_messageEnumerator.Current is not T);
+                message = await _messageChan.ReadAsync(cancellation.Token);
+            } while (message is not T);
         }
-        finally
+        catch (TaskCanceledException)
         {
-            Logger.LogDebug($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>()" +
-                            $" -> {sw.ElapsedMilliseconds} ms" + (cts.IsCancellationRequested ? " (TIMEOUT)" : ""));
+            Logger.LogWarning($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>() -> {sw.ElapsedMilliseconds} ms (TIMEOUT)");
+            throw;
         }
 
-        return (T)_messageEnumerator.Current;
+        Logger.LogDebug($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>() -> {sw.ElapsedMilliseconds} ms");
+        return (T)message;
     }
 }
