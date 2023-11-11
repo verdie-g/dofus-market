@@ -432,6 +432,12 @@ IEnumerable<ItemPrice> ReadServersAverageItemPrices(DofusData data)
     string itemAveragePricesPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Dofus", "itemAveragePrices.dat");
+    if (!File.Exists(itemAveragePricesPath))
+    {
+        logger.LogWarning($"File \"{itemAveragePricesPath}\" does not exist");
+        yield break;
+    }
+
     var reader = new AmfReader(File.ReadAllBytes(itemAveragePricesPath));
     var root = (Amf3Object)reader.ReadAmf3();
     foreach (KeyValuePair<string, object> server in root.DynamicMembersAndValues)
