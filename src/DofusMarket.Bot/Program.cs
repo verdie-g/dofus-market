@@ -18,6 +18,7 @@ InitializeLogging();
 var l = LoggerProvider.CreateLogger<Program>();
 while (true)
 {
+    TimeSpan delay;
     try
     {
         KillAll("dofus");
@@ -35,13 +36,15 @@ while (true)
             (int)sw.Elapsed.TotalMinutes);
 
         metrics.WriteItemAveragePrices(ReadServersAverageItemPrices(dofusData));
+
+        delay = TimeSpan.FromHours(6);
     }
     catch (Exception e)
     {
         l.LogError(e, "An error occured while collecting prices");
+        delay = TimeSpan.FromHours(3);
     }
 
-    var delay = TimeSpan.FromHours(6);
     l.LogInformation($"Waiting {delay} for next run");
     await Task.Delay(delay);
 }
