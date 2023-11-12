@@ -25,7 +25,7 @@
     env:
       GF_SERVER_DOMAIN: "{{ dofus_market_domain_name }}"
       GF_SERVER_HTTP_PORT: "{{ grafana_port | string }}"
-      GF_FEATURE_TOGGLES_ENABLE: publicDashboards
+      GF_SERVER_ENABLE_GZIP: "true"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_NAME: "Visitors"
     comparisons:
