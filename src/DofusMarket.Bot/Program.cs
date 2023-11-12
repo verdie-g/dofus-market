@@ -294,7 +294,7 @@ async Task<ExchangeTypesItemsExchangerDescriptionForUserMessage> SelectItemAsync
     {
         search = await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>(TimeSpan.FromSeconds(2));
     }
-    catch (TaskCanceledException)
+    catch (OperationCanceledException)
     {
     }
 
@@ -334,7 +334,7 @@ async Task UnselectItemAsync(Window dofusWindow, NetworkMessageReader messageRea
     {
         search = await messageReader.WaitForMessageAsync<ExchangeBidHouseSearchMessage>(TimeSpan.FromSeconds(2));
     }
-    catch (TaskCanceledException)
+    catch (OperationCanceledException)
     {
     }
 

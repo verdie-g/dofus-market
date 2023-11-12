@@ -29,7 +29,7 @@ internal class NetworkMessageReader
                 message = await _messageChan.ReadAsync(cancellation.Token);
             } while (message is not T);
         }
-        catch (TaskCanceledException)
+        catch (OperationCanceledException)
         {
             Logger.LogWarning($"{nameof(NetworkMessageReader)}.{nameof(WaitForMessageAsync)}<{typeof(T).Name}>() -> {sw.ElapsedMilliseconds} ms (TIMEOUT)");
             throw;
