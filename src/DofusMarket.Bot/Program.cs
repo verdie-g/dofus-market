@@ -94,15 +94,18 @@ async Task CollectAllServerItemPricesAsync(DofusMarketMetrics metrics)
         firstItemPosition: new Point(900, 220),
         itemFunc: async (serverIdx, serverPosition) =>
         {
-            if (servers[serverIdx] == null)
+            var server = servers[serverIdx];
+            if (server == null)
             {
                 return;
             }
 
             using var serverLoggingScope = logger.BeginScope(new KeyValuePair<string, object>[]
             {
-                new("server.id", servers[serverIdx]!.Id),
+                new("server.id", server.Id),
             });
+
+            logger.LogDebug(server.ToString());
 
             await Task.Delay(50);
             dofusWindow.MouseClick(new Point(739, 178), debugName: "Order servers by name");
